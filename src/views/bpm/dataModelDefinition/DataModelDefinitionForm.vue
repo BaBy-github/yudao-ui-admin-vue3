@@ -24,10 +24,10 @@
         </el-select>
       </el-form-item>
       <el-form-item label="元数据" prop="metaData">
-        <el-input v-model="formData.metaData" type="textarea" placeholder="请输入元数据" />
+        <monaco-editor v-model="formData.metaData" class="monaco-editor" />
       </el-form-item>
       <el-form-item label="示例" prop="sample">
-        <el-input v-model="formData.sample" placeholder="请输入示例" />
+        <monaco-editor v-model="formData.sample" class="monaco-editor" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -39,6 +39,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DataModelDefinitionApi from '@/api/bpm/dataModelDefinition'
+import MonacoEditor from '@/components/MonacoEditor/index.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -120,3 +121,9 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 </script>
+<style scoped>
+.monaco-editor {
+  width: 100%;
+  height: 300px;
+}
+</style>

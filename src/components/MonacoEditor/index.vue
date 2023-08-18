@@ -29,7 +29,8 @@ export default {
         language: 'json',
         theme: 'vs-dark',
         selectOnLineNumbers: true,
-        renderSideBySide: false
+        renderSideBySide: false,
+        automaticLayout: true
       })
 
       monacoEditor.onDidChangeModelContent(() => {
