@@ -16,7 +16,7 @@ self.MonacoEnvironment = {
 export default {
   name: 'MonacoEditor',
   props: {
-    value: String
+    modelValue: String
   },
   setup(props, { emit }) {
     let monacoEditor = null
@@ -24,7 +24,7 @@ export default {
 
     onMounted(() => {
       monacoEditor = monaco.editor.create(proxy.$refs.editorContainer, {
-        value: props.value,
+        value: props.modelValue,
         readOnly: false,
         language: 'json',
         theme: 'vs-dark',
@@ -34,16 +34,15 @@ export default {
       })
 
       monacoEditor.onDidChangeModelContent(() => {
-        const currentValue = monacoEditor.getValue()
-        emit('update:value', currentValue)
+        emit('update:modelValue', monacoEditor.getValue())
       })
     })
 
     watch(
-      () => props.value,
-      (newValue) => {
-        if (newValue !== monacoEditor?.getValue()) {
-          monacoEditor.setValue(newValue)
+      () => props.modelValue,
+      (propsModelValue) => {
+        if (propsModelValue !== monacoEditor?.getValue()) {
+          monacoEditor.setValue(propsModelValue)
         }
       }
     )
