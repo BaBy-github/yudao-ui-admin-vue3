@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="100%" :style="{ height: '100%' }">
+  <Dialog :title="'云函数'" v-model="dialogVisible" width="100%" :style="{ height: '100%' }">
     <el-form
       ref="formRef"
       :model="formData"
@@ -7,29 +7,39 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="函数名" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入函数名" />
-      </el-form-item>
-      <el-form-item label="代码" prop="code">
-        <el-input v-model="formData.code" type="textarea" placeholder="请输入代码" />
-      </el-form-item>
-      <el-form-item label="实际参数列表" prop="parameters">
-        <el-input v-model="formData.parameters" placeholder="请输入实际参数列表" />
-      </el-form-item>
-      <el-form-item label="描述">
-        <Editor v-model="formData.description" height="150px" />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-radio-group v-model="formData.status">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
+      <el-container>
+        <el-aside width="50%" :style="{ height: '84vh' }">
+          <monaco-editor v-model="formData.code" :options="{ language: 'javascript' }" />
+        </el-aside>
+        <el-container>
+          <el-header>Header</el-header>
+          <el-main>Main</el-main>
+          <el-footer>Footer</el-footer>
+        </el-container>
+      </el-container>
+      <!--      <el-form-item label="函数名" prop="name">-->
+      <!--        <el-input v-model="formData.name" placeholder="请输入函数名" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="代码" prop="code">-->
+      <!--        <el-input v-model="formData.code" type="textarea" placeholder="请输入代码" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="实际参数列表" prop="parameters">-->
+      <!--        <el-input v-model="formData.parameters" placeholder="请输入实际参数列表" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="描述">-->
+      <!--        <Editor v-model="formData.description" height="150px" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="状态" prop="status">-->
+      <!--        <el-radio-group v-model="formData.status">-->
+      <!--          <el-radio-->
+      <!--            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"-->
+      <!--            :key="dict.value"-->
+      <!--            :label="dict.value"-->
+      <!--          >-->
+      <!--            {{ dict.label }}-->
+      <!--          </el-radio>-->
+      <!--        </el-radio-group>-->
+      <!--      </el-form-item>-->
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
