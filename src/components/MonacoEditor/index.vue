@@ -6,6 +6,7 @@
 import { getCurrentInstance, onMounted, watch } from 'vue'
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
+import * as _ from 'lodash'
 
 self.MonacoEnvironment = {
   getWorker() {
@@ -16,7 +17,8 @@ self.MonacoEnvironment = {
 export default {
   name: 'MonacoEditor',
   props: {
-    modelValue: String
+    modelValue: String,
+    options: Object
   },
   setup(props, { emit }) {
     let monacoEditor = null
@@ -26,7 +28,7 @@ export default {
       monacoEditor = monaco.editor.create(proxy.$refs.editorContainer, {
         value: props.modelValue,
         readOnly: false,
-        language: 'json',
+        language: _.get(props.options, 'language', 'json'),
         theme: 'vs-dark',
         selectOnLineNumbers: true,
         renderSideBySide: false,
@@ -55,6 +57,7 @@ export default {
 <style scoped>
 .code-editor {
   width: 100%;
+  height: 100%;
   min-height: 200px;
 }
 </style>
