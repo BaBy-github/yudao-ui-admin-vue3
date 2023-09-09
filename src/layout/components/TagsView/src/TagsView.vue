@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, watch, computed, unref, ref, nextTick } from 'vue'
+import { onMounted, watch, computed, unref, ref, nextTick, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
@@ -12,6 +12,7 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { useTemplateRefsList } from '@vueuse/core'
 import { ElScrollbar } from 'element-plus'
 import { useScrollTo } from '@/hooks/event/useScrollTo'
+import draggable from 'vuedraggable'
 
 const { getPrefixCls } = useDesign()
 
@@ -245,6 +246,14 @@ const move = (to: number) => {
   start()
 }
 
+const onStart = () => {
+  console.log('drag start')
+}
+
+const onEnd = () => {
+  console.log('drag end')
+}
+
 onMounted(() => {
   initTags()
   addTags()
@@ -279,106 +288,122 @@ watch(
     <div class="overflow-hidden flex-1">
       <ElScrollbar ref="scrollbarRef" class="h-full" @scroll="scroll">
         <div class="flex h-full">
-          <ContextMenu
-            :ref="itemRefs.set"
-            :schema="[
-              {
-                icon: 'ep:refresh',
-                label: t('common.reload'),
-                disabled: selectedTag?.fullPath !== item.fullPath,
-                command: () => {
-                  refreshSelectedTag(item)
-                }
-              },
-              {
-                icon: 'ep:close',
-                label: t('common.closeTab'),
-                disabled: !!visitedViews?.length && selectedTag?.meta.affix,
-                command: () => {
-                  closeSelectedTag(item)
-                }
-              },
-              {
-                divided: true,
-                icon: 'ep:d-arrow-left',
-                label: t('common.closeTheLeftTab'),
-                disabled:
-                  !!visitedViews?.length &&
-                  (item.fullPath === visitedViews[0].fullPath ||
-                    selectedTag?.fullPath !== item.fullPath),
-                command: () => {
-                  closeLeftTags()
-                }
-              },
-              {
-                icon: 'ep:d-arrow-right',
-                label: t('common.closeTheRightTab'),
-                disabled:
-                  !!visitedViews?.length &&
-                  (item.fullPath === visitedViews[visitedViews.length - 1].fullPath ||
-                    selectedTag?.fullPath !== item.fullPath),
-                command: () => {
-                  closeRightTags()
-                }
-              },
-              {
-                divided: true,
-                icon: 'ep:discount',
-                label: t('common.closeOther'),
-                disabled: selectedTag?.fullPath !== item.fullPath,
-                command: () => {
-                  closeOthersTags()
-                }
-              },
-              {
-                icon: 'ep:minus',
-                label: t('common.closeAll'),
-                command: () => {
-                  closeAllTags()
-                }
-              }
-            ]"
-            v-for="item in visitedViews"
-            :key="item.fullPath"
-            :tag-item="item"
-            :class="[
-              `${prefixCls}__item`,
-              item?.meta?.affix ? `${prefixCls}__item--affix` : '',
-              {
-                'is-active': isActive(item)
-              }
-            ]"
-            @visible-change="visibleChange"
+          <draggable
+            :list="visitedViews"
+            ghost-class="ghost"
+            chosen-class="chosenClass"
+            animation="300"
+            item-key="fullPath"
+            @start="onStart"
+            @end="onEnd"
           >
-            <div>
-              <router-link :ref="tagLinksRefs.set" :to="{ ...item }" custom v-slot="{ navigate }">
-                <div
-                  @click="navigate"
-                  class="h-full flex justify-center items-center whitespace-nowrap pl-15px"
-                >
-                  <Icon
-                    v-if="
-                      item?.matched &&
-                      item?.matched[1] &&
-                      item?.matched[1]?.meta?.icon &&
-                      tagsViewIcon
-                    "
-                    :icon="item?.matched[1]?.meta?.icon"
-                    :size="12"
-                    class="mr-5px"
-                  />
-                  {{ t(item?.meta?.title as string) }}
-                  <Icon
-                    :class="`${prefixCls}__item--close`"
-                    color="#333"
-                    icon="ep:close"
-                    :size="12"
-                    @click.prevent.stop="closeSelectedTag(item)"
-                  />
+            <template #item="{ element }">
+              <ContextMenu
+                :ref="itemRefs.set"
+                :schema="[
+                  {
+                    icon: 'ep:refresh',
+                    label: t('common.reload'),
+                    disabled: selectedTag?.fullPath !== element.fullPath,
+                    command: () => {
+                      refreshSelectedTag(element)
+                    }
+                  },
+                  {
+                    icon: 'ep:close',
+                    label: t('common.closeTab'),
+                    disabled: !!visitedViews?.length && selectedTag?.meta.affix,
+                    command: () => {
+                      closeSelectedTag(element)
+                    }
+                  },
+                  {
+                    divided: true,
+                    icon: 'ep:d-arrow-left',
+                    label: t('common.closeTheLeftTab'),
+                    disabled:
+                      !!visitedViews?.length &&
+                      (element.fullPath === visitedViews[0].fullPath ||
+                        selectedTag?.fullPath !== element.fullPath),
+                    command: () => {
+                      closeLeftTags()
+                    }
+                  },
+                  {
+                    icon: 'ep:d-arrow-right',
+                    label: t('common.closeTheRightTab'),
+                    disabled:
+                      !!visitedViews?.length &&
+                      (element.fullPath === visitedViews[visitedViews.length - 1].fullPath ||
+                        selectedTag?.fullPath !== element.fullPath),
+                    command: () => {
+                      closeRightTags()
+                    }
+                  },
+                  {
+                    divided: true,
+                    icon: 'ep:discount',
+                    label: t('common.closeOther'),
+                    disabled: selectedTag?.fullPath !== element.fullPath,
+                    command: () => {
+                      closeOthersTags()
+                    }
+                  },
+                  {
+                    icon: 'ep:minus',
+                    label: t('common.closeAll'),
+                    command: () => {
+                      closeAllTags()
+                    }
+                  }
+                ]"
+                :key="element.fullPath"
+                :tag-item="element"
+                :class="[
+                  `${prefixCls}__item`,
+                  element?.meta?.affix ? `${prefixCls}__item--affix` : '',
+                  {
+                    'is-active': isActive(element)
+                  }
+                ]"
+                @visible-change="visibleChange"
+              >
+                <div>
+                  <router-link
+                    :ref="tagLinksRefs.set"
+                    :to="{ ...element }"
+                    custom
+                    v-slot="{ navigate }"
+                  >
+                    <div
+                      @click="navigate"
+                      class="h-full flex justify-center items-center whitespace-nowrap pl-15px"
+                    >
+                      <Icon
+                        v-if="
+                          element?.matched &&
+                          element?.matched[1] &&
+                          element?.matched[1]?.meta?.icon &&
+                          tagsViewIcon
+                        "
+                        :icon="element?.matched[1]?.meta?.icon"
+                        :size="12"
+                        class="mr-5px"
+                      />
+                      {{ t(element?.meta?.title as string) }}
+                      <Icon
+                        :class="`${prefixCls}__item--close`"
+                        color="#333"
+                        icon="ep:close"
+                        :size="12"
+                        @click.prevent.stop="closeSelectedTag(element)"
+                      />
+                    </div>
+                  </router-link>
                 </div>
-              </router-link>
-            </div>
-          </ContextMenu>
+              </ContextMenu>
+            </template>
+          </draggable>
         </div>
       </ElScrollbar>
     </div>
@@ -581,5 +606,23 @@ $prefix-cls: #{$namespace}-tags-view;
       }
     }
   }
+}
+.item {
+  border: solid 1px #eee;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.item:hover {
+  cursor: move;
+}
+.item + .item {
+  margin-top: 10px;
+}
+.ghost {
+  border: solid 1px rgb(19, 41, 239);
+}
+.chosenClass {
+  background-color: #f1f1f1;
 }
 </style>
