@@ -55,15 +55,41 @@
                   <el-tab-pane
                     :label="param.name"
                     :name="param.id"
-                    v-for="param in params"
+                    v-for="(param, index) in params"
                     :style="{ height: '30vh' }"
                     :key="param.id"
                   >
                     <el-container>
+                      <el-aside width="10%">
+                        <el-space direction="vertical">
+                          <el-tooltip content="重命名参数" placement="left">
+                            <el-button size="small" @click="renameParam(param)">
+                              <Icon icon="fa-solid:keyboard" />
+                            </el-button>
+                          </el-tooltip>
+                          <el-tooltip content="向左移动" placement="left">
+                            <el-button
+                              size="small"
+                              @click="swapWithParam(param, 'left')"
+                              :disabled="index === 0"
+                            >
+                              <Icon icon="fa-solid:angle-double-left" />
+                            </el-button>
+                          </el-tooltip>
+                          <el-tooltip content="向右移动" placement="left">
+                            <el-button
+                              size="small"
+                              @click="swapWithParam(param, 'right')"
+                              :disabled="index === params.length - 1"
+                            >
+                              <Icon icon="fa-solid:angle-double-right" />
+                            </el-button>
+                          </el-tooltip>
+                        </el-space>
+                      </el-aside>
                       <el-main :style="{ padding: 0 }">
                         <monaco-editor v-model="param.sample" :options="{ language: 'json' }" />
                       </el-main>
-                      <el-aside width="10%"><el-button @click="renameParam(param)" /></el-aside>
                     </el-container>
                   </el-tab-pane>
                 </el-tabs>
@@ -190,6 +216,15 @@ const renameParam = (param: paramDef) => {
   } else {
     ElMessage.warning('参数名已存在或未修改')
   }
+}
+
+const swapWithParam = (param, direction) => {
+  const paramIndex = _.findIndex(params.value, { id: param.id })
+  const swapWithParamIndex = direction === 'left' ? paramIndex - 1 : paramIndex + 1
+
+  const item = _.cloneDeep(params.value[paramIndex])
+  params.value[paramIndex] = params.value[swapWithParamIndex]
+  params.value[swapWithParamIndex] = item
 }
 
 /** 打开弹窗 */
