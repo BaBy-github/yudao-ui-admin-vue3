@@ -49,15 +49,15 @@
                 <el-tabs
                   v-model="activeParamPaneName"
                   type="border-card"
-                  :style="{ height: '100%' }"
                   editable
                   @edit="editParamTabs"
                 >
                   <el-tab-pane
                     :label="param.name"
-                    :name="param.name"
-                    v-for="(param, index) in params"
-                    :key="index"
+                    :name="param.id"
+                    v-for="param in params"
+                    :style="{ height: '30vh' }"
+                    :key="param.id"
                   >
                     <el-container>
                       <el-main :style="{ padding: 0 }">
@@ -111,6 +111,7 @@ import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import * as _ from 'lodash'
 import { string } from 'vue-types'
 import { TabPaneName } from 'element-plus'
+import { generateUUID } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -137,6 +138,7 @@ const formRef = ref() // 表单 Ref
 interface paramDef {
   name: string
   sample: string
+  id: string
 }
 const params = ref<paramDef[]>()
 
@@ -149,14 +151,15 @@ const activeParamPaneName = ref('')
 const editParamTabs = (targetName: TabPaneName | undefined, action: 'remove' | 'add') => {
   if (action === 'remove') {
     params.value = _.reject(params.value, { name: targetName })
-    activeParamPaneName.value = _.get(params.value, '[0].name', '')
+    activeParamPaneName.value = _.get(params.value, '[0].id', '')
   } else if (action === 'add') {
     const newParam = {
       name: generateNewParamName(),
-      sample: '{}'
+      sample: '{}',
+      id: generateUUID()
     }
     params.value?.push(newParam)
-    activeParamPaneName.value = newParam.name
+    activeParamPaneName.value = param.value.id
   }
 }
 
@@ -182,7 +185,7 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await CloudFunctionApi.getCloudFunction(id)
       params.value = JSON.parse(formData.value.parameters)
-      activeParamPaneName.value = _.get(params.value, '[0].name', '')
+      activeParamPaneName.value = _.get(params.value, '[0].id', '')
     } finally {
       formLoading.value = false
     }
