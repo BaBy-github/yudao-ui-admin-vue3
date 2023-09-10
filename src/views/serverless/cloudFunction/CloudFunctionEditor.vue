@@ -136,7 +136,7 @@
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import * as _ from 'lodash'
 import { string } from 'vue-types'
-import { ElMessage, TabPaneName } from 'element-plus'
+import { ElNotification, TabPaneName } from 'element-plus'
 import { generateUUID } from '@/utils'
 
 const { t } = useI18n() // 国际化
@@ -214,7 +214,7 @@ const renameParam = (param: paramDef) => {
     params.value = _.reject(params.value, { name: param.name }).concat(newParam)
     activeParamPaneName.value = newParam.id
   } else {
-    ElMessage.warning('参数名已存在或未修改')
+    ElNotification.error('参数名已存在或未修改')
   }
 }
 
