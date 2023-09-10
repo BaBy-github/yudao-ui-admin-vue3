@@ -46,8 +46,19 @@
           <el-main class="params-editor" :style="{ padding: 0 }">
             <el-container>
               <el-header height="50vh">
-                <el-tabs type="border-card" :style="{ height: '100%' }">
-                  <el-tab-pane :label="param.name" v-for="(param, index) in params" :key="index">
+                <el-tabs
+                  v-model="activeParamPaneName"
+                  type="border-card"
+                  :style="{ height: '100%' }"
+                  editable
+                  @edit="editParamTabs"
+                >
+                  <el-tab-pane
+                    :label="param.name"
+                    :name="param.name"
+                    v-for="(param, index) in params"
+                    :key="index"
+                  >
                     <el-container>
                       <el-main :style="{ padding: 0 }">
                         <monaco-editor v-model="param.sample" :options="{ language: 'json' }" />
@@ -99,6 +110,7 @@
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import * as _ from 'lodash'
 import { string } from 'vue-types'
+import { TabPaneName } from 'element-plus'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -133,6 +145,31 @@ const selectSettingCommand = (command: string | number | object) => {
   console.log(`click on item ${command}`)
 }
 
+const activeParamPaneName = ref('')
+const editParamTabs = (targetName: TabPaneName | undefined, action: 'remove' | 'add') => {
+  if (action === 'remove') {
+    params.value = _.reject(params.value, { name: targetName })
+    activeParamPaneName.value = _.get(params.value, '[0].name', '')
+  } else if (action === 'add') {
+    const newParam = {
+      name: generateNewParamName(),
+      sample: '{}'
+    }
+    params.value?.push(newParam)
+    activeParamPaneName.value = newParam.name
+  }
+}
+
+const generateNewParamName = () => {
+  let i = _.get(params.value, 'length', 0)
+  while (true) {
+    const newParamName = `param${++i}`
+    if (!_.includes(params.value, { name: newParamName })) {
+      return newParamName
+    }
+  }
+}
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -145,6 +182,7 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await CloudFunctionApi.getCloudFunction(id)
       params.value = JSON.parse(formData.value.parameters)
+      activeParamPaneName.value = _.get(params.value, '[0].name', '')
     } finally {
       formLoading.value = false
     }
