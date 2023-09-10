@@ -10,8 +10,12 @@
       <el-container>
         <el-header class="action-bar" height="10%" :style="{ paddingBottom: '5px' }">
           <el-row>
-            <el-col :offset="20" :span="4" class="runtime-buttons">
-              <el-button @click="execute">执行</el-button>
+            <el-col :offset="22" :span="2" class="runtime-buttons">
+              <el-tooltip content="运行">
+                <el-button @click="execute" type="success" plain>
+                  <Icon icon="fa-solid:play" />
+                </el-button>
+              </el-tooltip>
             </el-col>
           </el-row>
         </el-header>
