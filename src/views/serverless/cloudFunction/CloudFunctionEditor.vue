@@ -25,7 +25,10 @@
                 <el-tabs type="border-card">
                   <el-tab-pane :label="param.name" v-for="(param, index) in params" :key="index">
                     <el-container>
-                      <el-main />
+                      <el-main :style="{ padding: 0 }">
+                        <monaco-editor v-model="param.sample" :options="{ language: 'json' }" />
+                      </el-main>
+                      <el-aside width="10%"><el-button /></el-aside>
                     </el-container>
                   </el-tab-pane>
                 </el-tabs>
@@ -68,6 +71,7 @@
 </template>
 <script setup lang="ts">
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
+import * as _ from 'lodash'
 import { string } from 'vue-types'
 
 const { t } = useI18n() // 国际化
@@ -81,7 +85,7 @@ const formData = ref({
   id: undefined,
   name: undefined,
   code: string,
-  parameters: undefined,
+  parameters: string,
   description: undefined,
   status: undefined
 })
@@ -93,10 +97,9 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 let params = reactive([
-  { name: 'dataModel1', sample: '{"a":1,"b":2}' },
-  { name: 'dataModel2', sample: '{"a":1,"b":2}' },
-  { name: 'dataModel3', sample: '{"a":1,"b":2}' },
-  { name: 'dataModel4', sample: '{"a":1,"b":2}' }
+  { name: 'param1', sample: '{"val":1}' },
+  { name: 'param2', sample: '{"val":2}' },
+  { name: 'param3', sample: '{"val":3}' }
 ])
 
 /** 打开弹窗 */
@@ -121,7 +124,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const execute = async () => {
   const resp = await CloudFunctionApi.executeCloudFunction({
     code: formData.value.code,
-    parameters: '[{"val":1},{"val":2}]'
+    parameters: `[${_.join(_.map(params, 'sample'), ',')}]`
   })
   executeResult.value = resp
 }
