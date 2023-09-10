@@ -63,7 +63,7 @@
                       <el-main :style="{ padding: 0 }">
                         <monaco-editor v-model="param.sample" :options="{ language: 'json' }" />
                       </el-main>
-                      <el-aside width="10%"><el-button /></el-aside>
+                      <el-aside width="10%"><el-button @click="renameParam(param)" /></el-aside>
                     </el-container>
                   </el-tab-pane>
                 </el-tabs>
@@ -110,7 +110,7 @@
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import * as _ from 'lodash'
 import { string } from 'vue-types'
-import { TabPaneName } from 'element-plus'
+import { ElMessage, TabPaneName } from 'element-plus'
 import { generateUUID } from '@/utils'
 
 const { t } = useI18n() // 国际化
@@ -170,6 +170,25 @@ const generateNewParamName = () => {
     if (!_.includes(params.value, { name: newParamName })) {
       return newParamName
     }
+  }
+}
+
+const renameParam = (param: paramDef) => {
+  const newParamName = prompt('请输入新的参数名', param.name)
+  if (
+    newParamName &&
+    newParamName !== param.name &&
+    !_.find(params.value, { name: newParamName })
+  ) {
+    const newParam = {
+      name: newParamName,
+      sample: param.sample,
+      id: param.id
+    }
+    params.value = _.reject(params.value, { name: param.name }).concat(newParam)
+    activeParamPaneName.value = newParam.id
+  } else {
+    ElMessage.warning('参数名已存在或未修改')
   }
 }
 
