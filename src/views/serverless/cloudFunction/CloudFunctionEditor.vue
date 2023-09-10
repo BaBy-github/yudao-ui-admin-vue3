@@ -1,5 +1,10 @@
 <template>
-  <Dialog :title="'云函数'" v-model="dialogVisible" width="100%" :style="{ height: '100%' }">
+  <Dialog
+    :title="'云函数' + formData.name"
+    v-model="dialogVisible"
+    width="100%"
+    :style="{ height: '100vh' }"
+  >
     <el-form
       ref="formRef"
       :model="formData"
@@ -8,7 +13,7 @@
       v-loading="formLoading"
     >
       <el-container>
-        <el-header class="action-bar" height="10%" :style="{ padding: '0 0 5px 0' }">
+        <el-header class="action-bar" height="5vh" :style="{ padding: '0 0 1vh 0' }">
           <el-row>
             <el-col :span="2">
               <el-dropdown @command="selectSettingCommand">
@@ -35,13 +40,13 @@
           </el-row>
         </el-header>
         <el-container class="editor">
-          <el-aside class="code-editor" width="50%" :style="{ height: '80vh' }">
+          <el-aside class="code-editor" width="50%" :style="{ height: '78vh' }">
             <monaco-editor v-model="formData.code" :options="{ language: 'javascript' }" />
           </el-aside>
           <el-main class="params-editor" :style="{ padding: 0 }">
             <el-container>
-              <el-header height="30%">
-                <el-tabs type="border-card">
+              <el-header height="50vh">
+                <el-tabs type="border-card" :style="{ height: '100%' }">
                   <el-tab-pane :label="param.name" v-for="(param, index) in params" :key="index">
                     <el-container>
                       <el-main :style="{ padding: 0 }">
@@ -52,8 +57,10 @@
                   </el-tab-pane>
                 </el-tabs>
               </el-header>
-              <el-main>executeResult{{ executeResult }}</el-main>
-              <el-footer>Footer</el-footer>
+              <el-footer height="20vh">
+                executeResult: {{ executeResult }}
+                <!--                <monaco-editor v-model="executeResult" :options="{ language: 'javascript' }" />-->
+              </el-footer>
             </el-container>
           </el-main>
         </el-container>
@@ -108,18 +115,18 @@ const formData = ref({
   description: undefined,
   status: undefined
 })
-const executeResult = ref('') // 执行结果
+const executeResult = ref<string>('') // 执行结果
 const formRules = reactive({
   name: [{ required: true, message: '函数名不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
-let params = reactive([
-  { name: 'param1', sample: '{"val":1}' },
-  { name: 'param2', sample: '{"val":2}' },
-  { name: 'param3', sample: '{"val":3}' }
-])
+interface paramDef {
+  name: string
+  sample: string
+}
+const params = ref<paramDef[]>()
 
 /** 点击设置 */
 const selectSettingCommand = (command: string | number | object) => {
@@ -137,6 +144,7 @@ const open = async (type: string, id?: number) => {
     // formLoading.value = true
     try {
       formData.value = await CloudFunctionApi.getCloudFunction(id)
+      params.value = JSON.parse(formData.value.parameters)
     } finally {
       formLoading.value = false
     }
@@ -148,9 +156,10 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const execute = async () => {
   const resp = await CloudFunctionApi.executeCloudFunction({
     code: formData.value.code,
-    parameters: `[${_.join(_.map(params, 'sample'), ',')}]`
+    parameters: `[${_.join(_.map(params.value, 'sample'), ',')}]`
   })
   executeResult.value = resp
+  console.log(executeResult.value)
 }
 
 /** 提交表单 */
@@ -168,6 +177,7 @@ const submitForm = async () => {
       await CloudFunctionApi.createCloudFunction(data)
       message.success(t('common.createSuccess'))
     } else {
+      data.parameters = JSON.stringify(params.value)
       await CloudFunctionApi.updateCloudFunction(data)
       message.success(t('common.updateSuccess'))
     }
