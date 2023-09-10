@@ -95,7 +95,28 @@
                 </el-tabs>
               </el-header>
               <el-footer height="20vh">
-                executeResult: {{ executeResult }}
+                <el-progress
+                  v-if="executeStatus === 'success'"
+                  :percentage="100"
+                  status="success"
+                  :show-text="false"
+                />
+                <el-progress
+                  v-else-if="executeStatus === 'loading'"
+                  :percentage="100"
+                  status="success"
+                  :indeterminate="true"
+                  :duration="1"
+                  :show-text="false"
+                />
+                <el-progress
+                  v-else-if="executeStatus === 'error'"
+                  :percentage="100"
+                  status="exception"
+                  :show-text="false"
+                />
+                <el-progress v-else :percentage="100" :show-text="false" />
+                {{ executeResult }}
                 <!--                <monaco-editor v-model="executeResult" :options="{ language: 'javascript' }" />-->
               </el-footer>
             </el-container>
@@ -248,6 +269,7 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 执行云函数 */
+const executeStatus = ref('init')
 interface ExecuteResult {
   params: string
   code: string
@@ -255,13 +277,16 @@ interface ExecuteResult {
   result: any
 }
 const execute = async () => {
+  executeStatus.value = 'loading'
   const resp: ExecuteResult = await CloudFunctionApi.executeCloudFunction({
     code: formData.value.code,
     parameters: `[${_.join(_.map(params.value, 'sample'), ',')}]`
   })
   if (resp.success) {
+    executeStatus.value = 'success'
     ElNotification.success('执行成功')
   } else {
+    executeStatus.value = 'error'
     ElNotification.error('执行失败。请按提示修复错误')
   }
   executeResult.value = resp.result
