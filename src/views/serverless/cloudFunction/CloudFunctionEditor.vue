@@ -248,13 +248,23 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 执行云函数 */
+interface ExecuteResult {
+  params: string
+  code: string
+  success: boolean
+  result: any
+}
 const execute = async () => {
-  const resp = await CloudFunctionApi.executeCloudFunction({
+  const resp: ExecuteResult = await CloudFunctionApi.executeCloudFunction({
     code: formData.value.code,
     parameters: `[${_.join(_.map(params.value, 'sample'), ',')}]`
   })
-  executeResult.value = resp
-  console.log(executeResult.value)
+  if (resp.success) {
+    ElNotification.success('执行成功')
+  } else {
+    ElNotification.error('执行失败。请按提示修复错误')
+  }
+  executeResult.value = resp.result
 }
 
 /** 提交表单 */
