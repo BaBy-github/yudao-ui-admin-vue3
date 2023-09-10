@@ -289,6 +289,7 @@ watch(
       <ElScrollbar ref="scrollbarRef" class="h-full" @scroll="scroll">
         <div class="flex h-full">
           <draggable
+            class="menu-draggable"
             :list="visitedViews"
             ghost-class="ghost"
             chosen-class="chosenClass"
@@ -607,22 +608,8 @@ $prefix-cls: #{$namespace}-tags-view;
     }
   }
 }
-.item {
-  border: solid 1px #eee;
-  padding: 6px 10px;
-  text-align: left;
-}
-
-.item:hover {
-  cursor: move;
-}
-.item + .item {
-  margin-top: 10px;
-}
-.ghost {
-  border: solid 1px rgb(19, 41, 239);
-}
-.chosenClass {
-  background-color: #f1f1f1;
+.menu-draggable {
+  display: flex;
+  flex-wrap: nowrap;
 }
 </style>
