@@ -8,9 +8,24 @@
       v-loading="formLoading"
     >
       <el-container>
-        <el-header class="action-bar" height="10%" :style="{ paddingBottom: '5px' }">
+        <el-header class="action-bar" height="10%" :style="{ padding: '0 0 5px 0' }">
           <el-row>
-            <el-col :offset="22" :span="2" class="runtime-buttons">
+            <el-col :span="2">
+              <el-dropdown @command="selectSettingCommand">
+                <el-button type="info" plain>
+                  <Icon icon="fa-solid:bars" />
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="a">Action 1</el-dropdown-item>
+                    <el-dropdown-item command="b">Action 2</el-dropdown-item>
+                    <el-dropdown-item command="c">Action 3</el-dropdown-item>
+                    <el-dropdown-item command="e" divided>font size</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </el-col>
+            <el-col :offset="20" :span="2" class="runtime-buttons">
               <el-tooltip content="运行">
                 <el-button @click="execute" type="success" plain>
                   <Icon icon="fa-solid:play" />
@@ -105,6 +120,11 @@ let params = reactive([
   { name: 'param2', sample: '{"val":2}' },
   { name: 'param3', sample: '{"val":3}' }
 ])
+
+/** 点击设置 */
+const selectSettingCommand = (command: string | number | object) => {
+  console.log(`click on item ${command}`)
+}
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
