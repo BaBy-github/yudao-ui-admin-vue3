@@ -8,13 +8,32 @@
       v-loading="formLoading"
     >
       <el-container>
-        <el-aside width="50%" :style="{ height: '84vh' }">
-          <monaco-editor v-model="formData.code" :options="{ language: 'javascript' }" />
-        </el-aside>
-        <el-container>
-          <el-header>Header</el-header>
-          <el-main>Main</el-main>
-          <el-footer>Footer</el-footer>
+        <el-header class="action-bar" height="10%" :style="{ paddingBottom: '5px' }">
+          <el-row>
+            <el-col :offset="20" :span="4" class="runtime-buttons">
+              <el-button @click="execute">执行</el-button>
+            </el-col>
+          </el-row>
+        </el-header>
+        <el-container class="editor">
+          <el-aside class="code-editor" width="50%" :style="{ height: '80vh' }">
+            <monaco-editor v-model="formData.code" :options="{ language: 'javascript' }" />
+          </el-aside>
+          <el-main class="params-editor" :style="{ padding: 0 }">
+            <el-container>
+              <el-header height="30%">
+                <el-tabs type="border-card">
+                  <el-tab-pane :label="param.name" v-for="(param, index) in params" :key="index">
+                    <el-container>
+                      <el-main />
+                    </el-container>
+                  </el-tab-pane>
+                </el-tabs>
+              </el-header>
+              <el-main>executeResult{{ executeResult }}</el-main>
+              <el-footer>Footer</el-footer>
+            </el-container>
+          </el-main>
         </el-container>
       </el-container>
       <!--      <el-form-item label="函数名" prop="name">-->
@@ -48,30 +67,37 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
+import { string } from 'vue-types'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const dialogFullscreen = ref(true)
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: undefined,
-  code: undefined,
+  code: string,
   parameters: undefined,
   description: undefined,
   status: undefined
 })
+const executeResult = ref('') // 执行结果
 const formRules = reactive({
   name: [{ required: true, message: '函数名不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+
+let params = reactive([
+  { name: 'dataModel1', sample: '{"a":1,"b":2}' },
+  { name: 'dataModel2', sample: '{"a":1,"b":2}' },
+  { name: 'dataModel3', sample: '{"a":1,"b":2}' },
+  { name: 'dataModel4', sample: '{"a":1,"b":2}' }
+])
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -90,6 +116,15 @@ const open = async (type: string, id?: number) => {
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 执行云函数 */
+const execute = async () => {
+  const resp = await CloudFunctionApi.executeCloudFunction({
+    code: formData.value.code,
+    parameters: '[{"val":1},{"val":2}]'
+  })
+  executeResult.value = resp
+}
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

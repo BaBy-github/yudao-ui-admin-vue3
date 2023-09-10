@@ -9,6 +9,16 @@ export interface CloudFunctionVO {
   status: number
 }
 
+export interface CloudFunctionExecuteVO {
+  code: string
+  parameters: string
+}
+
+// 执行云函数
+export async function executeCloudFunction(data: CloudFunctionExecuteVO) {
+  return await request.post({ url: `/serverless/cloud-function/execute`, data })
+}
+
 // 查询云函数列表
 export const getCloudFunctionPage = async (params) => {
   return await request.get({ url: `/serverless/cloud-function/page`, params })
