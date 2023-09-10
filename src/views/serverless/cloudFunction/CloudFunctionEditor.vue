@@ -193,7 +193,7 @@ const generateNewParamName = () => {
   let i = _.get(params.value, 'length', 0)
   while (true) {
     const newParamName = `param${++i}`
-    if (!_.includes(params.value, { name: newParamName })) {
+    if (_.isEmpty(_.find(params.value, { name: newParamName }))) {
       return newParamName
     }
   }
