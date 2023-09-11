@@ -24,6 +24,11 @@ export const getCloudFunctionPage = async (params) => {
   return await request.get({ url: `/serverless/cloud-function/page`, params })
 }
 
+// 查询菜单列表
+export const getCloudFunctionList = (params) => {
+  return request.get({ url: '/serverless/cloud-function/list', params })
+}
+
 // 查询云函数详情
 export const getCloudFunction = async (id: number) => {
   return await request.get({ url: `/serverless/cloud-function/get?id=` + id })

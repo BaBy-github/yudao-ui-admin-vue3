@@ -17,15 +17,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="实际参数列表" prop="parameters">
-        <el-input
-          v-model="queryParams.parameters"
-          placeholder="请输入实际参数列表"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -35,17 +26,6 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -67,15 +47,25 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
+        <el-button plain type="danger" @click="toggleExpandAll">
+          <Icon class="mr-5px" icon="ep:sort" />
+          展开/折叠
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="序号" type="index" width="70px" />
-      <el-table-column label="编号" align="center" prop="id" width="150px" />
+    <el-table
+      v-if="refreshTable"
+      v-loading="loading"
+      :data="list"
+      :default-expand-all="isExpandAll"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      row-key="id"
+    >
       <el-table-column label="函数名" align="center" prop="name" width="150px" />
       <el-table-column label="代码" align="center" prop="code" width="150px" />
       <el-table-column label="实际参数列表" align="center" prop="parameters" width="150px" />
@@ -113,13 +103,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
-    <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -134,6 +117,7 @@ import download from '@/utils/download'
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import CloudFunctionForm from './CloudFunctionForm.vue'
 import CloudFunctionEditor from './CloudFunctionEditor.vue'
+import { handleTree } from '@/utils/tree'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -141,33 +125,36 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
   name: null,
-  code: null,
-  parameters: null,
-  description: null,
-  status: null,
-  createTime: []
+  status: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const isExpandAll = ref(false) // 是否展开，默认全部折叠
+const refreshTable = ref(true) // 重新渲染表格状态
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CloudFunctionApi.getCloudFunctionPage(queryParams)
-    list.value = data.list
-    total.value = data.total
+    const data = await CloudFunctionApi.getCloudFunctionList(queryParams)
+    list.value = handleTree(data)
   } finally {
     loading.value = false
   }
 }
 
+/** 展开/折叠操作 */
+const toggleExpandAll = () => {
+  refreshTable.value = false
+  isExpandAll.value = !isExpandAll.value
+  nextTick(() => {
+    refreshTable.value = true
+  })
+}
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.pageNo = 1
   getList()
 }
 
