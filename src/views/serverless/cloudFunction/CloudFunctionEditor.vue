@@ -56,7 +56,7 @@
                     :label="param.name"
                     :name="param.id"
                     v-for="(param, index) in params"
-                    :style="{ height: '30vh' }"
+                    :style="{ height: '50vh' }"
                     :key="param.id"
                   >
                     <el-container>
@@ -87,14 +87,14 @@
                           </el-tooltip>
                         </el-space>
                       </el-aside>
-                      <el-main :style="{ padding: 0 }">
+                      <el-main :style="{ padding: 0, height: '42vh' }">
                         <monaco-editor v-model="param.sample" :options="{ language: 'json' }" />
                       </el-main>
                     </el-container>
                   </el-tab-pane>
                 </el-tabs>
               </el-header>
-              <el-footer height="20vh">
+              <el-footer height="27vh">
                 <el-progress
                   v-if="executeStatus === 'success'"
                   :percentage="100"
@@ -116,8 +116,12 @@
                   :show-text="false"
                 />
                 <el-progress v-else :percentage="100" :show-text="false" />
-                {{ executeResult }}
-                <!--                <monaco-editor v-model="executeResult" :options="{ language: 'javascript' }" />-->
+                <el-card :style="{ height: '100%' }">
+                  <template #header>
+                    <span>执行结果</span>
+                  </template>
+                  <div>{{ executeResult }}</div>
+                </el-card>
               </el-footer>
             </el-container>
           </el-main>
