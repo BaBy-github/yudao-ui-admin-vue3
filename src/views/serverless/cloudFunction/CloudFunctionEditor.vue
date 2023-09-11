@@ -152,7 +152,7 @@
       <!--      </el-form-item>-->
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">保 存</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -315,7 +315,6 @@ const submitForm = async () => {
       await CloudFunctionApi.updateCloudFunction(data)
       message.success(t('common.updateSuccess'))
     }
-    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {
