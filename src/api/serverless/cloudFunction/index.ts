@@ -5,6 +5,7 @@ export interface CloudFunctionVO {
   name: string
   code: string
   parameters: string
+  parentId: number
   description: string
   status: number
 }

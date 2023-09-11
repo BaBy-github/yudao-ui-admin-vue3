@@ -30,14 +30,14 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['serverless:cloud-function:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
+        <!--        <el-button-->
+        <!--          type="primary"-->
+        <!--          plain-->
+        <!--          @click="openForm('create')"-->
+        <!--          v-hasPermi="['serverless:cloud-function:create']"-->
+        <!--        >-->
+        <!--          <Icon icon="ep:plus" class="mr-5px" /> 新增-->
+        <!--        </el-button>-->
         <el-button
           type="success"
           plain
@@ -85,6 +85,16 @@
       <el-table-column label="操作" align="center" width="150px">
         <template #default="scope">
           <el-button
+            v-if="scope.row.parentId === 0"
+            link
+            type="primary"
+            @click="createCloudFunction(scope.row)"
+            v-hasPermi="['serverless:cloud-function:create']"
+          >
+            新增
+          </el-button>
+          <el-button
+            v-else
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -118,6 +128,7 @@ import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import CloudFunctionForm from './CloudFunctionForm.vue'
 import CloudFunctionEditor from './CloudFunctionEditor.vue'
 import { handleTree } from '@/utils/tree'
+import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -164,10 +175,30 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
+/** 修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 添加操作 */
+const createCloudFunction = async (cloudFunction: CloudFunctionVO) => {
+  loading.value = true
+  try {
+    const createdCloudFunctionId = await CloudFunctionApi.createCloudFunction({
+      name: cloudFunction.name,
+      code: cloudFunction.code,
+      parameters: cloudFunction.parameters,
+      parentId: cloudFunction.id,
+      description: '',
+      status: cloudFunction.status
+    })
+    message.success(t('common.createSuccess'))
+    handleQuery()
+    openForm('edit', createdCloudFunctionId)
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 删除按钮操作 */
