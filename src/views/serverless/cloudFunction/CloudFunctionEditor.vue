@@ -38,7 +38,7 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item
-                      v-for="cloudFunction in sameParentCloudFunctions"
+                      v-for="cloudFunction in sameGroupCloudFunctions"
                       :command="cloudFunction.id"
                       :key="cloudFunction.id"
                       >{{ cloudFunction.name }}</el-dropdown-item
@@ -291,9 +291,9 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-const sameParentCloudFunctions = ref<CloudFunctionVO[]>([])
+const sameGroupCloudFunctions = ref<CloudFunctionVO[]>([])
 const loadSameParentCloudFunctions = async () => {
-  sameParentCloudFunctions.value = await CloudFunctionApi.getCloudFunctionList({
+  sameGroupCloudFunctions.value = await CloudFunctionApi.getCloudFunctionList({
     parentId: formData.value.parentId
   })
 }
