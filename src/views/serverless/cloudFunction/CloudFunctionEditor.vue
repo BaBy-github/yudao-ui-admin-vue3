@@ -175,7 +175,7 @@
 <script setup lang="ts">
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import * as _ from 'lodash'
-import { string } from 'vue-types'
+import { number, string } from 'vue-types'
 import { ElNotification, TabPaneName } from 'element-plus'
 import { generateUUID } from '@/utils'
 import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
@@ -188,12 +188,13 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
+  id: number,
+  name: string,
   code: string,
   parameters: string,
-  description: undefined,
-  status: undefined
+  parentId: number,
+  description: string,
+  status: number
 })
 const executeResult = ref<string>('') // 执行结果
 const formRules = reactive({
@@ -293,8 +294,9 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 const sameGroupCloudFunctions = ref<CloudFunctionVO[]>([])
 const loadSameParentCloudFunctions = async () => {
+  const isOutstandingCloudFunction = formData.value.parentId === 0
   sameGroupCloudFunctions.value = await CloudFunctionApi.getCloudFunctionList({
-    parentId: formData.value.parentId
+    parentId: isOutstandingCloudFunction ? formData.value.id : formData.value.parentId
   })
 }
 const switchSameGroupCloudFunction = (id: number) => {

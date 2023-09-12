@@ -82,7 +82,7 @@
         :formatter="dateFormatter"
         width="150px"
       />
-      <el-table-column label="操作" align="center" width="150px">
+      <el-table-column label="操作" align="center" width="200px">
         <template #default="scope">
           <el-button
             v-if="scope.row.parentId === 0"
@@ -94,7 +94,6 @@
             新增
           </el-button>
           <el-button
-            v-else
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
