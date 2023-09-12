@@ -31,6 +31,21 @@
               </el-dropdown>
             </el-col>
             <el-col :offset="20" :span="2" class="runtime-buttons">
+              <el-dropdown @command="switchSameGroupCloudFunction">
+                <el-button type="info" plain>
+                  <Icon icon="fa-solid:bars" />
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      v-for="cloudFunction in sameParentCloudFunctions"
+                      :command="cloudFunction.id"
+                      :key="cloudFunction.id"
+                      >{{ cloudFunction.name }}</el-dropdown-item
+                    >
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
               <el-tooltip content="运行">
                 <el-button @click="execute" type="success" plain>
                   <Icon icon="fa-solid:play" />
@@ -163,6 +178,7 @@ import * as _ from 'lodash'
 import { string } from 'vue-types'
 import { ElNotification, TabPaneName } from 'element-plus'
 import { generateUUID } from '@/utils'
+import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -255,8 +271,8 @@ const swapWithParam = (param, direction) => {
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
-  formType.value = type
+  dialogTitle.value = t('action.update')
+  formType.value = 'update'
   resetForm()
   // 修改时，设置数据
   if (id) {
@@ -265,12 +281,25 @@ const open = async (type: string, id?: number) => {
       formData.value = await CloudFunctionApi.getCloudFunction(id)
       params.value = JSON.parse(formData.value.parameters)
       activeParamPaneName.value = _.get(params.value, '[0].id', '')
+      if (type !== 'switch') {
+        loadSameParentCloudFunctions()
+      }
     } finally {
       formLoading.value = false
     }
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+const sameParentCloudFunctions = ref<CloudFunctionVO[]>([])
+const loadSameParentCloudFunctions = async () => {
+  sameParentCloudFunctions.value = await CloudFunctionApi.getCloudFunctionList({
+    parentId: formData.value.parentId
+  })
+}
+const switchSameGroupCloudFunction = (id: number) => {
+  open('switch', id)
+}
 
 /** 执行云函数 */
 const executeStatus = ref('init')
