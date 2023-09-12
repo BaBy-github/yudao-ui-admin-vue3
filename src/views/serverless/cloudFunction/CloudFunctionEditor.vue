@@ -196,6 +196,7 @@ const formData = ref({
   description: string,
   status: number
 })
+const isOutstandingCloudFunction = computed(() => formData.value.parentId === 0) // outstanding理解为一批的云函数的代表，主要其他组件运行时使用
 const executeResult = ref<string>('') // 执行结果
 const formRules = reactive({
   name: [{ required: true, message: '函数名不能为空', trigger: 'blur' }],
@@ -294,7 +295,6 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 const sameGroupCloudFunctions = ref<CloudFunctionVO[]>([])
 const loadSameParentCloudFunctions = async () => {
-  const isOutstandingCloudFunction = formData.value.parentId === 0
   sameGroupCloudFunctions.value = await CloudFunctionApi.getCloudFunctionList({
     parentId: isOutstandingCloudFunction ? formData.value.id : formData.value.parentId
   })
