@@ -35,17 +35,35 @@
                 {{ formData.name }}
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item :command="outstandingCloudFunction.id">{{
-                      outstandingCloudFunction.name
-                    }}</el-dropdown-item>
+                    <el-dropdown-item :command="outstandingCloudFunction.id">
+                      <el-row :style="{ width: '150px' }">
+                        <el-col :span="3"
+                          ><Icon
+                            v-if="formData.id === outstandingCloudFunction.id"
+                            icon="fa-solid:circle"
+                            :size="10"
+                            color="#409EFF"
+                        /></el-col>
+                        <el-col :span="12">{{ outstandingCloudFunction.name }}</el-col>
+                      </el-row>
+                    </el-dropdown-item>
                     <el-dropdown-item
                       v-for="(cloudFunction, index) in sameGroupCloudFunctions"
                       :divided="index === 0"
                       :command="cloudFunction.id"
                       :key="cloudFunction.id"
-                      >{{ cloudFunction.id === formData.id ? '·' : ''
-                      }}{{ cloudFunction.name }}</el-dropdown-item
                     >
+                      <el-row :style="{ width: '150px' }">
+                        <el-col :span="3"
+                          ><Icon
+                            v-if="formData.id === cloudFunction.id"
+                            icon="fa-solid:circle"
+                            :size="10"
+                            color="#409EFF"
+                        /></el-col>
+                        <el-col :span="12">{{ cloudFunction.name }}</el-col>
+                      </el-row>
+                    </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
