@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :title="'云函数' + formData.name + isOutstandingCloudFunction"
+    :title="'云函数' + formData.name + (isOutstandingCloudFunction ? '<outstanding>' : '')"
     v-model="dialogVisible"
     width="100%"
     :style="{ height: '100vh' }"
@@ -35,15 +35,16 @@
                 {{ formData.name }}
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <!--                    <el-dropdown-item :command="outstandingCloudFunction.id">{{-->
-                    <!--                      outstandingCloudFunction.name-->
-                    <!--                    }}</el-dropdown-item>-->
+                    <el-dropdown-item :command="outstandingCloudFunction.id">{{
+                      outstandingCloudFunction.name
+                    }}</el-dropdown-item>
                     <el-dropdown-item
                       v-for="(cloudFunction, index) in sameGroupCloudFunctions"
-                      :divided="!isOutstandingCloudFunction && index === 0"
+                      :divided="index === 0"
                       :command="cloudFunction.id"
                       :key="cloudFunction.id"
-                      >{{ cloudFunction.name }}</el-dropdown-item
+                      >{{ cloudFunction.id === formData.id ? '·' : ''
+                      }}{{ cloudFunction.name }}</el-dropdown-item
                     >
                   </el-dropdown-menu>
                 </template>
@@ -203,6 +204,16 @@ const formData = ref({
 const isOutstandingCloudFunction = computed(() => {
   return formData.value.parentId === 0
 })
+const outstandingCloudFunction = ref<CloudFunctionVO>({})
+const loadOutstandingCloudFunction = async () => {
+  if (!isOutstandingCloudFunction.value) {
+    outstandingCloudFunction.value = await CloudFunctionApi.getCloudFunction(
+      formData.value.parentId
+    )
+  } else {
+    outstandingCloudFunction.value = formData.value
+  }
+}
 const executeResult = ref<string>('') // 执行结果
 const formRules = reactive({
   name: [{ required: true, message: '函数名不能为空', trigger: 'blur' }],
@@ -291,7 +302,7 @@ const open = async (type: string, id?: number) => {
       activeParamPaneName.value = _.get(params.value, '[0].id', '')
       if (type !== 'switch') {
         loadSameParentCloudFunctions()
-        loadParentCloudFunction()
+        loadOutstandingCloudFunction()
       }
     } finally {
       formLoading.value = false
