@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :title="'云函数' + formData.name"
+    :title="'云函数' + formData.name + isOutstandingCloudFunction"
     v-model="dialogVisible"
     width="100%"
     :style="{ height: '100vh' }"
@@ -30,15 +30,17 @@
                 </template>
               </el-dropdown>
             </el-col>
-            <el-col :offset="20" :span="2" class="runtime-buttons">
-              <el-dropdown @command="switchSameGroupCloudFunction">
-                <el-button type="info" plain>
-                  <Icon icon="fa-solid:bars" />
-                </el-button>
+            <el-col :offset="19" :span="3" class="runtime-buttons">
+              <el-dropdown split-button @command="switchSameGroupCloudFunction" trigger="click">
+                {{ formData.name }}
                 <template #dropdown>
                   <el-dropdown-menu>
+                    <!--                    <el-dropdown-item :command="outstandingCloudFunction.id">{{-->
+                    <!--                      outstandingCloudFunction.name-->
+                    <!--                    }}</el-dropdown-item>-->
                     <el-dropdown-item
-                      v-for="cloudFunction in sameGroupCloudFunctions"
+                      v-for="(cloudFunction, index) in sameGroupCloudFunctions"
+                      :divided="!isOutstandingCloudFunction && index === 0"
                       :command="cloudFunction.id"
                       :key="cloudFunction.id"
                       >{{ cloudFunction.name }}</el-dropdown-item
@@ -196,7 +198,11 @@ const formData = ref({
   description: string,
   status: number
 })
-const isOutstandingCloudFunction = computed(() => formData.value.parentId === 0) // outstanding理解为一批的云函数的代表，主要其他组件运行时使用
+
+// outstanding理解为一批的云函数的代表，主要其他组件运行时使用
+const isOutstandingCloudFunction = computed(() => {
+  return formData.value.parentId === 0
+})
 const executeResult = ref<string>('') // 执行结果
 const formRules = reactive({
   name: [{ required: true, message: '函数名不能为空', trigger: 'blur' }],
@@ -285,6 +291,7 @@ const open = async (type: string, id?: number) => {
       activeParamPaneName.value = _.get(params.value, '[0].id', '')
       if (type !== 'switch') {
         loadSameParentCloudFunctions()
+        loadParentCloudFunction()
       }
     } finally {
       formLoading.value = false
@@ -296,7 +303,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const sameGroupCloudFunctions = ref<CloudFunctionVO[]>([])
 const loadSameParentCloudFunctions = async () => {
   sameGroupCloudFunctions.value = await CloudFunctionApi.getCloudFunctionList({
-    parentId: isOutstandingCloudFunction ? formData.value.id : formData.value.parentId
+    parentId: isOutstandingCloudFunction.value ? formData.value.id : formData.value.parentId
   })
 }
 const switchSameGroupCloudFunction = (id: number) => {
