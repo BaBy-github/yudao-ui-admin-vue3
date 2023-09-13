@@ -22,7 +22,7 @@
                 </el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item command="a">Action 1</el-dropdown-item>
+                    <el-dropdown-item command="rename">重命名</el-dropdown-item>
                     <el-dropdown-item command="b">Action 2</el-dropdown-item>
                     <el-dropdown-item command="c">Action 3</el-dropdown-item>
                     <el-dropdown-item command="e" divided>font size</el-dropdown-item>
@@ -248,7 +248,31 @@ const params = ref<paramDef[]>()
 
 /** 点击设置 */
 const selectSettingCommand = (command: string | number | object) => {
-  console.log(`click on item ${command}`)
+  switch (command) {
+    case 'rename':
+      renameCloudFunction()
+      break
+    case 'setFontSize':
+      setEditorFontSize()
+      break
+  }
+}
+const renameCloudFunction = () => {
+  ElMessageBox.prompt('重命名', 'Tip', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    inputPattern: '',
+    inputErrorMessage: 'Invalid Email'
+  })
+    .then(({ value }) => {
+      formData.value.name = value
+    })
+    .catch((e) => {
+      ElMessage({
+        type: 'error',
+        message: e
+      })
+    })
 }
 
 const activeParamPaneName = ref('')
