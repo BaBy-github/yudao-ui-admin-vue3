@@ -112,7 +112,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <DataModelDefinitionForm ref="formRef" @success="getList" />
+  <data-model-editor ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts" name="DataModelDefinition">
@@ -121,6 +121,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as DataModelDefinitionApi from '@/api/bpm/dataModelDefinition'
 import DataModelDefinitionForm from './DataModelDefinitionForm.vue'
+import DataModelEditor from '@/views/bpm/dataModelDefinition/DataModelEditor.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
