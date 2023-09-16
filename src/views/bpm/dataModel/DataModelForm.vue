@@ -38,7 +38,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as DataModelDefinitionApi from '@/api/bpm/dataModelDefinition'
+import * as DataModelApi from '@/api/bpm/dataModel'
 import MonacoEditor from '@/components/MonacoEditor/index.vue'
 
 const { t } = useI18n() // 国际化
@@ -74,7 +74,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DataModelDefinitionApi.getDataModelDefinition(id)
+      formData.value = await DataModelApi.getDataModel(id)
     } finally {
       formLoading.value = false
     }
@@ -92,12 +92,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as DataModelDefinitionApi.DataModelDefinitionVO
+    const data = formData.value as unknown as DataModelApi.DataModelVO
     if (formType.value === 'create') {
-      await DataModelDefinitionApi.createDataModelDefinition(data)
+      await DataModelApi.createDataModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DataModelDefinitionApi.updateDataModelDefinition(data)
+      await DataModelApi.updateDataModel(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

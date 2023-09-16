@@ -116,9 +116,9 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as DataModelDefinitionApi from '@/api/bpm/dataModelDefinition'
+import * as DataModelApi from '@/api/bpm/dataModel'
 import 'json-schema-editor-vue/lib/json-schema-editor-vue.css'
-import { validateJsonSchema, ValidateReqVO, ValidateResult } from '@/api/bpm/dataModelDefinition'
+import { validateJsonSchema, ValidateReqVO, ValidateResult } from '@/api/bpm/dataModel'
 import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
 import * as _ from 'lodash'
 import { ElNotification } from 'element-plus'
@@ -156,7 +156,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DataModelDefinitionApi.getDataModelDefinition(id)
+      formData.value = await DataModelApi.getDataModel(id)
     } finally {
       formLoading.value = false
     }
@@ -174,12 +174,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as DataModelDefinitionApi.DataModelDefinitionVO
+    const data = formData.value as unknown as DataModelApi.DataModelVO
     if (formType.value === 'create') {
-      await DataModelDefinitionApi.createDataModelDefinition(data)
+      await DataModelApi.createDataModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DataModelDefinitionApi.updateDataModelDefinition(data)
+      await DataModelApi.updateDataModel(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -212,7 +212,7 @@ const validateSample = async () => {
     json: formData.value.sample,
     jsonScheme: formData.value.metaData
   }
-  const resp: ValidateResult = await DataModelDefinitionApi.validateJsonSchema(data)
+  const resp: ValidateResult = await DataModelApi.validateJsonSchema(data)
   if (resp.success) {
     executeStatus.value = 'success'
     ElNotification.success('执行成功')
