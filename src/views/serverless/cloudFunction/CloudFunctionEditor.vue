@@ -122,10 +122,40 @@
                               <Icon icon="fa-solid:angle-double-right" />
                             </el-button>
                           </el-tooltip>
+                          <el-tooltip content="参数配置" placement="left">
+                            <el-button size="small" @click="toggleConfigParamForm(param)">
+                              <Icon icon="fa-solid:cog" />
+                            </el-button>
+                          </el-tooltip>
                         </el-space>
                       </el-aside>
                       <el-main :style="{ padding: 0, height: '42vh' }">
-                        <monaco-editor v-model="param.sample" :options="{ language: 'json' }" />
+                        <el-form v-if="paramConfigFormVisible" size="small">
+                          <el-form-item label="参数名">
+                            <el-input v-model="param.name" />
+                          </el-form-item>
+                          <el-form-item label="参数定义来源">
+                            <el-radio-group
+                              v-model="param.type"
+                              @change="(type) => updateParamType(type, param)"
+                            >
+                              <el-radio-button label="normal">自定义</el-radio-button>
+                              <el-radio-button label="component">低代码组件</el-radio-button>
+                            </el-radio-group>
+                          </el-form-item>
+                          <el-form-item
+                            label="低代码组件ID"
+                            v-show="param.type === paramType.Component"
+                          >
+                            <el-input v-model="param.componentId" />
+                          </el-form-item>
+                          {{ paramIdMapComponentDetails[param.id] }}
+                        </el-form>
+                        <monaco-editor
+                          v-else
+                          v-model="param.sample"
+                          :options="{ language: 'json' }"
+                        />
                       </el-main>
                     </el-container>
                   </el-tab-pane>
@@ -201,6 +231,8 @@ import { number, string } from 'vue-types'
 import { ElNotification, TabPaneName } from 'element-plus'
 import { generateUUID } from '@/utils'
 import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
+import * as DataModelApi from '@/api/bpm/dataModel'
+import component from '*.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -243,7 +275,13 @@ const formRef = ref() // 表单 Ref
 interface paramDef {
   name: string
   sample: string
+  type: paramType
+  componentId: string
   id: string
+}
+enum paramType {
+  Normal = 'normal',
+  Component = 'component'
 }
 const params = ref<paramDef[]>()
 
@@ -282,9 +320,11 @@ const editParamTabs = (targetName: TabPaneName | undefined, action: 'remove' | '
     params.value = _.reject(params.value, { name: targetName })
     activeParamPaneName.value = _.get(params.value, '[0].id', '')
   } else if (action === 'add') {
-    const newParam = {
+    const newParam: paramDef = {
       name: generateNewParamName(),
       sample: '{}',
+      type: paramType.Normal,
+      componentId: '',
       id: generateUUID()
     }
     params.value?.push(newParam)
@@ -335,8 +375,22 @@ const swapWithParam = (param, direction) => {
     refreshParamsTab.value = true
   })
 }
-
+/** 配置参数 */
+const paramConfigFormVisible = ref<boolean>(false)
+const toggleConfigParamForm = () => {
+  paramConfigFormVisible.value = !paramConfigFormVisible.value
+}
+const updateParamType = (type: string, param: paramDef) => {
+  param.type = type
+}
 /** 打开弹窗 */
+const getComponentType = (componentId) => {
+  return _.split(componentId, ':')[0]
+}
+const getComponentId = (componentId) => {
+  return _.split(componentId, ':')[1]
+}
+const paramIdMapComponentDetails = ref({})
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.update')
@@ -349,6 +403,19 @@ const open = async (type: string, id?: number) => {
       formData.value = await CloudFunctionApi.getCloudFunction(id)
       params.value = JSON.parse(formData.value.parameters)
       activeParamPaneName.value = _.get(params.value, '[0].id', '')
+
+      // 查找参数引用组件
+      _.forEach(params.value, (param) => {
+        if (param.type === paramType.Component) {
+          const paramComponentType = getComponentType(param.componentId)
+          const componentRealId = getComponentId(param.componentId)
+          if (paramComponentType === 'DataModel') {
+            DataModelApi.getDataModel(componentRealId).then(
+              (res) => (paramIdMapComponentDetails.value[param.id] = res)
+            )
+          }
+        }
+      })
       if (type !== 'switch') {
         loadSameParentCloudFunctions()
         loadOutstandingCloudFunction()
