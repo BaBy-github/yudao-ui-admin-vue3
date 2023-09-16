@@ -39,8 +39,8 @@
             </el-col>
           </el-row>
         </el-header>
-        <el-container class="editor" :style="{ height: '77vh' }">
-          <el-aside class="code-editor" width="50%" :style="{ height: '77vh' }">
+        <el-container class="editor" :style="{ height: '76vh' }">
+          <el-aside class="code-editor" width="50%" :style="{ height: '76vh' }">
             <el-card :style="{ height: '100%' }">
               <monaco-editor v-model="formData.metaData" :style="{ height: '72vh' }" />
             </el-card>
@@ -49,10 +49,10 @@
             <el-container>
               <el-header height="50vh">
                 <el-card :style="{ height: '100%' }">
-                  <monaco-editor v-model="formData.sample" :style="{ height: '44vh' }" />
+                  <monaco-editor v-model="formData.sample" :style="{ height: '45vh' }" />
                 </el-card>
               </el-header>
-              <el-footer height="24vh">
+              <el-footer height="25vh">
                 <el-progress
                   v-if="executeStatus === 'success'"
                   :percentage="100"
