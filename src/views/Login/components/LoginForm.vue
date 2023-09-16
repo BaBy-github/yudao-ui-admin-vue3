@@ -188,7 +188,7 @@ const loginData = reactive({
   loginForm: {
     tenantName: '芋道源码',
     username: 'admin',
-    password: 'admin123',
+    password: 'vgJsjajiynosR72a',
     captchaVerification: '',
     rememberMe: false
   }

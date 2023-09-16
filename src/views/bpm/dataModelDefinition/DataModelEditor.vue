@@ -30,18 +30,56 @@
                 </template>
               </el-dropdown>
             </el-col>
-            <el-col :offset="19" :span="3" class="runtime-buttons" />
+            <el-col :offset="19" :span="3" class="runtime-buttons">
+              <el-tooltip content="运行">
+                <el-button @click="validateSample" type="success" plain>
+                  <Icon icon="fa-solid:play" />
+                </el-button>
+              </el-tooltip>
+            </el-col>
           </el-row>
         </el-header>
-        <el-container class="editor">
-          <el-aside class="code-editor" width="50%" :style="{ height: '78vh' }">
-            <json-schema-editor :value="tree" />
+        <el-container class="editor" :style="{ height: '77vh' }">
+          <el-aside class="code-editor" width="50%" :style="{ height: '77vh' }">
+            <el-card :style="{ height: '100%' }">
+              <monaco-editor v-model="formData.metaData" :style="{ height: '72vh' }" />
+            </el-card>
           </el-aside>
           <el-main class="params-editor" :style="{ padding: 0 }">
             <el-container>
-              <el-header height="50vh" />
-              <el-footer height="27vh">
-                <el-card :style="{ height: '100%' }" />
+              <el-header height="50vh">
+                <el-card :style="{ height: '100%' }">
+                  <monaco-editor v-model="formData.sample" :style="{ height: '44vh' }" />
+                </el-card>
+              </el-header>
+              <el-footer height="24vh">
+                <el-progress
+                  v-if="executeStatus === 'success'"
+                  :percentage="100"
+                  status="success"
+                  :show-text="false"
+                />
+                <el-progress
+                  v-else-if="executeStatus === 'loading'"
+                  :percentage="100"
+                  status="success"
+                  :indeterminate="true"
+                  :duration="1"
+                  :show-text="false"
+                />
+                <el-progress
+                  v-else-if="executeStatus === 'error'"
+                  :percentage="100"
+                  status="exception"
+                  :show-text="false"
+                />
+                <el-progress v-else :percentage="100" :show-text="false" />
+                <el-card :style="{ height: '100%' }">
+                  <template #header>
+                    <span>执行结果</span>
+                  </template>
+                  <div>{{ executeResult }}</div>
+                </el-card>
               </el-footer>
             </el-container>
           </el-main>
@@ -80,6 +118,10 @@
 <script setup lang="ts">
 import * as DataModelDefinitionApi from '@/api/bpm/dataModelDefinition'
 import 'json-schema-editor-vue/lib/json-schema-editor-vue.css'
+import { validateJsonSchema, ValidateReqVO, ValidateResult } from '@/api/bpm/dataModelDefinition'
+import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
+import * as _ from 'lodash'
+import { ElNotification } from 'element-plus'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -159,6 +201,27 @@ const resetForm = () => {
     sample: undefined
   }
   formRef.value?.resetFields()
+}
+
+/** 校验 */
+const executeResult = ref<string>('')
+const executeStatus = ref<string>('init')
+const validateSample = async () => {
+  executeStatus.value = 'loading'
+  const data: ValidateReqVO = {
+    json: formData.value.sample,
+    jsonScheme: formData.value.metaData
+  }
+  const resp: ValidateResult = await DataModelDefinitionApi.validateJsonSchema(data)
+  if (resp.success) {
+    executeStatus.value = 'success'
+    ElNotification.success('执行成功')
+    executeResult.value = 'true'
+  } else {
+    executeStatus.value = 'error'
+    ElNotification.error('执行失败。请按提示修复错误')
+    executeResult.value = resp.errorMessage
+  }
 }
 </script>
 <style scoped>

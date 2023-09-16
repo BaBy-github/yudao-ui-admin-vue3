@@ -9,6 +9,23 @@ export interface DataModelDefinitionVO {
   sample: string
 }
 
+export interface ValidateReqVO {
+  dataModelId: number
+  json: string
+  jsonScheme: string
+}
+
+export interface ValidateResult {
+  success: boolean
+  errorMessage: string
+  errorMessageDetail: object
+}
+
+// 校验数据模型
+export const validateJsonSchema = async (data: ValidateReqVO) => {
+  return await request.post({ url: `/bpm/data-model-definition/validate`, data })
+}
+
 // 查询数据模型定义列表
 export const getDataModelDefinitionPage = async (params) => {
   return await request.get({ url: `/bpm/data-model-definition/page`, params })
