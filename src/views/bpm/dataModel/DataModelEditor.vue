@@ -42,10 +42,33 @@
         <el-container class="editor" :style="{ height: '76vh' }">
           <el-aside class="code-editor" width="50%" :style="{ height: '76vh' }">
             <el-card :style="{ height: '100%' }">
-              <monaco-editor v-model="formData.metaData" :style="{ height: '72vh' }" />
+              <el-container>
+                <el-main class="clear-padding" :style="{ height: '68vh' }">
+                  <monaco-editor
+                    v-if="jsonSchemaViewer === 'monacoEditor'"
+                    v-model="formData.metaData"
+                    :style="{ height: '68vh' }"
+                  />
+                  <div v-else></div>
+                </el-main>
+                <el-footer class="clear-padding">
+                  <el-row>
+                    <el-col :offset="21" :span="3">
+                      <el-radio-group v-model="jsonSchemaViewer" size="small" style="margin: 0">
+                        <el-radio-button label="monacoEditor"
+                          ><Icon icon="fa-solid:list-ol" size="12"
+                        /></el-radio-button>
+                        <el-radio-button label="jsonSchemaEditor"
+                          ><Icon icon="fa-solid:spell-check" size="12"
+                        /></el-radio-button>
+                      </el-radio-group>
+                    </el-col>
+                  </el-row>
+                </el-footer>
+              </el-container>
             </el-card>
           </el-aside>
-          <el-main class="params-editor" :style="{ padding: 0 }">
+          <el-main class="params-editor clear-padding">
             <el-container>
               <el-header height="50vh">
                 <el-card :style="{ height: '100%' }">
@@ -164,6 +187,9 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
+/** 切换视图 */
+const jsonSchemaViewer = ref<string>('monacoEditor')
+
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -228,5 +254,8 @@ const validateSample = async () => {
 .monaco-editor {
   width: 100%;
   height: 300px;
+}
+.clear-padding {
+  padding: 0;
 }
 </style>
