@@ -83,6 +83,7 @@
             <el-container>
               <el-header height="50vh">
                 <el-tabs
+                  v-if="refreshParamsTab"
                   v-model="activeParamPaneName"
                   type="border-card"
                   editable
@@ -320,13 +321,19 @@ const renameParam = (param: paramDef) => {
   }
 }
 
+const refreshParamsTab = ref<boolean>(true)
+
 const swapWithParam = (param, direction) => {
+  refreshParamsTab.value = false
   const paramIndex = _.findIndex(params.value, { id: param.id })
   const swapWithParamIndex = direction === 'left' ? paramIndex - 1 : paramIndex + 1
 
   const item = _.cloneDeep(params.value[paramIndex])
   params.value[paramIndex] = params.value[swapWithParamIndex]
   params.value[swapWithParamIndex] = item
+  nextTick(() => {
+    refreshParamsTab.value = true
+  })
 }
 
 /** 打开弹窗 */
