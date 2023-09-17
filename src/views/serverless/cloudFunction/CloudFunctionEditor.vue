@@ -77,7 +77,7 @@
         </el-header>
         <el-container class="editor">
           <el-aside class="code-editor" width="50%" :style="{ height: '78vh' }">
-            <monaco-editor v-model="formData.code" :options="{ language: 'javascript' }" />
+            <monaco-editor v-model="formData.code" language="javascript" />
           </el-aside>
           <el-main class="params-editor" :style="{ padding: 0 }">
             <el-container>
@@ -167,7 +167,6 @@
                         <monaco-editor
                           v-else
                           v-model="param.sample"
-                          :options="{ language: 'json' }"
                           @change="checkComponentSchema(param)"
                         />
                       </el-main>

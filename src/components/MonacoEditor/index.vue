@@ -8,17 +8,15 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 import * as _ from 'lodash'
 
-self.MonacoEnvironment = {
-  getWorker() {
-    return new JsonWorker()
-  }
-}
-
 export default {
   name: 'MonacoEditor',
   props: {
     modelValue: String,
     options: Object,
+    language: {
+      type: String,
+      default: 'json'
+    },
     readOnly: Boolean
   },
   setup(props, { emit }) {
@@ -26,10 +24,11 @@ export default {
     const { proxy } = getCurrentInstance()
 
     onMounted(() => {
+      console.log('props.language', props.language)
       monacoEditor = monaco.editor.create(proxy.$refs.editorContainer, {
         value: props.modelValue,
         readOnly: props.readOnly,
-        language: _.get(props.options, 'language', 'json'),
+        language: props.language,
         theme: 'vs-dark',
         selectOnLineNumbers: true,
         renderSideBySide: false,
