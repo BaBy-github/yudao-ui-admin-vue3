@@ -8,6 +8,12 @@ import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js'
 import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
 import * as _ from 'lodash'
 
+self.MonacoEnvironment = {
+  getWorker() {
+    return new JsonWorker()
+  }
+}
+
 export default {
   name: 'MonacoEditor',
   props: {
