@@ -155,7 +155,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <HttpConnectorForm ref="formRef" @success="getList" />
+  <HttpConnectorEditor ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts" name="HttpConnector">
@@ -163,7 +163,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as HttpConnectorApi from '@/api/serverless/httpConnector'
-import HttpConnectorForm from './HttpConnectorForm.vue'
+import HttpConnectorEditor from '@/views/serverless/httpConnector/HttpConnectorEditor.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
