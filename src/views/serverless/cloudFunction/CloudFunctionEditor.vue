@@ -82,97 +82,102 @@
           <el-main class="params-editor" :style="{ padding: 0 }">
             <el-container>
               <el-header height="50vh">
-                <el-tabs
-                  v-if="refreshParamsTab"
-                  v-model="activeParamPaneName"
-                  type="border-card"
-                  editable
-                  @edit="editParamTabs"
-                >
-                  <el-tab-pane
-                    :label="param.name"
-                    :name="param.id"
-                    v-for="(param, index) in params"
-                    :style="{ height: '50vh' }"
-                    :key="param.id"
+                <el-card>
+                  <el-tabs
+                    v-if="refreshParamsTab"
+                    v-model="activeParamPaneName"
+                    type="card"
+                    editable
+                    @edit="editParamTabs"
                   >
-                    <el-container>
-                      <el-aside width="10%">
-                        <el-space direction="vertical">
-                          <el-tooltip content="重命名参数" placement="left">
-                            <el-button size="small" @click="renameParam(param)">
-                              <Icon icon="fa-solid:keyboard" />
-                            </el-button>
-                          </el-tooltip>
-                          <el-tooltip content="向左移动" placement="left">
-                            <el-button
-                              size="small"
-                              @click="swapWithParam(param, 'left')"
-                              :disabled="index === 0"
+                    <el-tab-pane
+                      :label="param.name"
+                      :name="param.id"
+                      v-for="(param, index) in params"
+                      :style="{ height: '44vh' }"
+                      :key="param.id"
+                    >
+                      <el-container>
+                        <el-aside width="10%">
+                          <el-space direction="vertical">
+                            <el-tooltip content="重命名参数" placement="left">
+                              <el-button size="small" @click="renameParam(param)">
+                                <Icon icon="fa-solid:keyboard" />
+                              </el-button>
+                            </el-tooltip>
+                            <el-tooltip content="向左移动" placement="left">
+                              <el-button
+                                size="small"
+                                @click="swapWithParam(param, 'left')"
+                                :disabled="index === 0"
+                              >
+                                <Icon icon="fa-solid:angle-double-left" />
+                              </el-button>
+                            </el-tooltip>
+                            <el-tooltip content="向右移动" placement="left">
+                              <el-button
+                                size="small"
+                                @click="swapWithParam(param, 'right')"
+                                :disabled="index === params.length - 1"
+                              >
+                                <Icon icon="fa-solid:angle-double-right" />
+                              </el-button>
+                            </el-tooltip>
+                            <el-tooltip content="参数配置" placement="left">
+                              <el-button size="small" @click="toggleConfigParamForm(param)">
+                                <Icon icon="fa-solid:cog" />
+                              </el-button>
+                            </el-tooltip>
+                            <el-tooltip content="恢复默认值" placement="left">
+                              <el-button size="small" @click="rollBackToDefaultValue(param)">
+                                <Icon icon="fa-solid:undo" />
+                              </el-button>
+                            </el-tooltip>
+                          </el-space>
+                        </el-aside>
+                        <el-main :style="{ padding: 0, height: '38vh' }">
+                          <el-form v-if="paramConfigFormVisible" size="small">
+                            <el-form-item label="参数名">
+                              <el-input v-model="param.name" />
+                            </el-form-item>
+                            <el-form-item label="参数定义来源">
+                              <el-radio-group
+                                v-model="param.type"
+                                @change="(type) => updateParamType(type, param)"
+                              >
+                                <el-radio-button label="normal">自定义</el-radio-button>
+                                <el-radio-button label="component">低代码组件</el-radio-button>
+                              </el-radio-group>
+                            </el-form-item>
+                            <el-form-item
+                              label="组件ID"
+                              v-show="param.type === paramType.Component"
                             >
-                              <Icon icon="fa-solid:angle-double-left" />
-                            </el-button>
-                          </el-tooltip>
-                          <el-tooltip content="向右移动" placement="left">
-                            <el-button
-                              size="small"
-                              @click="swapWithParam(param, 'right')"
-                              :disabled="index === params.length - 1"
+                              <el-input
+                                v-model="param.componentId"
+                                @change="fetchParamReferComponent(param)"
+                              />
+                            </el-form-item>
+                            <el-form-item
+                              label="组件数据示例"
+                              v-if="paramIdMapComponentDetails[param.id]"
                             >
-                              <Icon icon="fa-solid:angle-double-right" />
-                            </el-button>
-                          </el-tooltip>
-                          <el-tooltip content="参数配置" placement="left">
-                            <el-button size="small" @click="toggleConfigParamForm(param)">
-                              <Icon icon="fa-solid:cog" />
-                            </el-button>
-                          </el-tooltip>
-                          <el-tooltip content="恢复默认值" placement="left">
-                            <el-button size="small" @click="rollBackToDefaultValue(param)">
-                              <Icon icon="fa-solid:undo" />
-                            </el-button>
-                          </el-tooltip>
-                        </el-space>
-                      </el-aside>
-                      <el-main :style="{ padding: 0, height: '42vh' }">
-                        <el-form v-if="paramConfigFormVisible" size="small">
-                          <el-form-item label="参数名">
-                            <el-input v-model="param.name" />
-                          </el-form-item>
-                          <el-form-item label="参数定义来源">
-                            <el-radio-group
-                              v-model="param.type"
-                              @change="(type) => updateParamType(type, param)"
-                            >
-                              <el-radio-button label="normal">自定义</el-radio-button>
-                              <el-radio-button label="component">低代码组件</el-radio-button>
-                            </el-radio-group>
-                          </el-form-item>
-                          <el-form-item label="组件ID" v-show="param.type === paramType.Component">
-                            <el-input
-                              v-model="param.componentId"
-                              @change="fetchParamReferComponent(param)"
-                            />
-                          </el-form-item>
-                          <el-form-item
-                            label="组件数据示例"
-                            v-if="paramIdMapComponentDetails[param.id]"
-                          >
-                            <monaco-editor
-                              v-model="paramIdMapComponentDetails[param.id].sample"
-                              read-only
-                            />
-                          </el-form-item>
-                        </el-form>
-                        <monaco-editor
-                          v-else
-                          v-model="param.sample"
-                          @change="checkComponentSchema(param)"
-                        />
-                      </el-main>
-                    </el-container>
-                  </el-tab-pane>
-                </el-tabs>
+                              <monaco-editor
+                                v-model="paramIdMapComponentDetails[param.id].sample"
+                                read-only
+                              />
+                            </el-form-item>
+                          </el-form>
+                          <monaco-editor
+                            v-else
+                            v-model="param.sample"
+                            @change="checkComponentSchema(param)"
+                          />
+                        </el-main>
+                      </el-container>
+                    </el-tab-pane>
+                  </el-tabs>
+                </el-card>
               </el-header>
               <el-footer height="27vh">
                 <el-progress
