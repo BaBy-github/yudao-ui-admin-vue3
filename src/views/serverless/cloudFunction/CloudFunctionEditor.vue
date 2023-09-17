@@ -168,6 +168,7 @@
                           v-else
                           v-model="param.sample"
                           :options="{ language: 'json' }"
+                          @change="checkComponentSchema(param)"
                         />
                       </el-main>
                     </el-container>
@@ -246,6 +247,7 @@ import { generateUUID } from '@/utils'
 import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
 import * as DataModelApi from '@/api/bpm/dataModel'
 import component from '*.vue'
+import { ValidateResult } from '@/api/bpm/dataModel'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -420,6 +422,25 @@ const fetchParamReferComponent = (param) => {
         }
       })
     }
+  }
+}
+const checkComponentSchema = async (param: paramDef) => {
+  try {
+    JSON.parse(param.sample)
+    if (param.type === paramType.Component) {
+      const paramComponentType = getComponentType(param.componentId)
+      if (paramComponentType === 'DataModel') {
+        const resp: ValidateResult = await DataModelApi.validateJsonSchema({
+          dataModelId: paramIdMapComponentDetails.value[param.id].id,
+          json: param.sample
+        })
+        if (!resp.success) {
+          ElNotification.error('参数不合法')
+        }
+      }
+    }
+  } catch (e) {
+    return
   }
 }
 const rollBackToDefaultValue = (param: paramDef) => {
