@@ -18,7 +18,8 @@ export default {
   name: 'MonacoEditor',
   props: {
     modelValue: String,
-    options: Object
+    options: Object,
+    readOnly: Boolean
   },
   setup(props, { emit }) {
     let monacoEditor = null
@@ -27,7 +28,7 @@ export default {
     onMounted(() => {
       monacoEditor = monaco.editor.create(proxy.$refs.editorContainer, {
         value: props.modelValue,
-        readOnly: false,
+        readOnly: props.readOnly,
         language: _.get(props.options, 'language', 'json'),
         theme: 'vs-dark',
         selectOnLineNumbers: true,

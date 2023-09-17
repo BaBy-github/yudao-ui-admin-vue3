@@ -158,7 +158,10 @@
                             label="组件数据示例"
                             v-if="paramIdMapComponentDetails[param.id]"
                           >
-                            <monaco-editor v-model="paramIdMapComponentDetails[param.id].sample" />
+                            <monaco-editor
+                              v-model="paramIdMapComponentDetails[param.id].sample"
+                              read-only
+                            />
                           </el-form-item>
                         </el-form>
                         <monaco-editor
