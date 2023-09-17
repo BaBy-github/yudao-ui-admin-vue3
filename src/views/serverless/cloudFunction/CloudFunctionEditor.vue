@@ -127,6 +127,11 @@
                               <Icon icon="fa-solid:cog" />
                             </el-button>
                           </el-tooltip>
+                          <el-tooltip content="恢复默认值" placement="left">
+                            <el-button size="small" @click="rollBackToDefaultValue(param)">
+                              <Icon icon="fa-solid:undo" />
+                            </el-button>
+                          </el-tooltip>
                         </el-space>
                       </el-aside>
                       <el-main :style="{ padding: 0, height: '42vh' }">
@@ -143,16 +148,18 @@
                               <el-radio-button label="component">低代码组件</el-radio-button>
                             </el-radio-group>
                           </el-form-item>
-                          <el-form-item
-                            label="低代码组件ID"
-                            v-show="param.type === paramType.Component"
-                          >
+                          <el-form-item label="组件ID" v-show="param.type === paramType.Component">
                             <el-input
                               v-model="param.componentId"
                               @change="fetchParamReferComponent(param)"
                             />
                           </el-form-item>
-                          {{ paramIdMapComponentDetails[param.id] }}
+                          <el-form-item
+                            label="组件数据示例"
+                            v-if="paramIdMapComponentDetails[param.id]"
+                          >
+                            <monaco-editor v-model="paramIdMapComponentDetails[param.id].sample" />
+                          </el-form-item>
                         </el-form>
                         <monaco-editor
                           v-else
@@ -409,6 +416,15 @@ const fetchParamReferComponent = (param) => {
           paramIdMapComponentDetails.value[param.id] = res
         }
       })
+    }
+  }
+}
+const rollBackToDefaultValue = (param: paramDef) => {
+  if (param.type === paramType.Normal) {
+    param.sample = '{}'
+  } else {
+    if (paramIdMapComponentDetails.value[param.id]) {
+      param.sample = paramIdMapComponentDetails.value[param.id].sample
     }
   }
 }
