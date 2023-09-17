@@ -147,7 +147,10 @@
                             label="低代码组件ID"
                             v-show="param.type === paramType.Component"
                           >
-                            <el-input v-model="param.componentId" />
+                            <el-input
+                              v-model="param.componentId"
+                              @change="fetchParamReferComponent(param)"
+                            />
                           </el-form-item>
                           {{ paramIdMapComponentDetails[param.id] }}
                         </el-form>
@@ -391,6 +394,25 @@ const getComponentId = (componentId) => {
   return _.split(componentId, ':')[1]
 }
 const paramIdMapComponentDetails = ref({})
+
+const fetchParamReferComponent = (param) => {
+  if (param.type === paramType.Component) {
+    const paramComponentType = getComponentType(param.componentId)
+    const componentRealId = getComponentId(param.componentId)
+
+    paramIdMapComponentDetails.value[param.id] = undefined
+    if (paramComponentType === 'DataModel') {
+      DataModelApi.getDataModel(componentRealId).then((res) => {
+        if (res === null) {
+          ElNotification.error(`未找到${param.name}引用的组件${param.componentId}`)
+        } else {
+          paramIdMapComponentDetails.value[param.id] = res
+        }
+      })
+    }
+  }
+}
+
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.update')
@@ -406,15 +428,7 @@ const open = async (type: string, id?: number) => {
 
       // 查找参数引用组件
       _.forEach(params.value, (param) => {
-        if (param.type === paramType.Component) {
-          const paramComponentType = getComponentType(param.componentId)
-          const componentRealId = getComponentId(param.componentId)
-          if (paramComponentType === 'DataModel') {
-            DataModelApi.getDataModel(componentRealId).then(
-              (res) => (paramIdMapComponentDetails.value[param.id] = res)
-            )
-          }
-        }
+        fetchParamReferComponent(param)
       })
       if (type !== 'switch') {
         loadSameParentCloudFunctions()
