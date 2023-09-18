@@ -73,6 +73,7 @@
                         :data="paramsKeyValues"
                         :column-config="{ resizable: true }"
                         :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }"
+                        @edit-closed="editClosedEvent"
                       >
                         <vxe-column type="seq" width="60" />
                         <vxe-column
@@ -198,6 +199,7 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await HttpConnectorApi.getHttpConnector(id)
       paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', []))
+      addParam(-1)
     } finally {
       formLoading.value = false
     }
@@ -222,6 +224,14 @@ const addParam = async (row?: KeyValueItem | number) => {
     await $table.setEditCell(newRow, 'key')
   }
 }
+const editClosedEvent: VxeTableEvents.EditClosed = ({ row, column }) => {
+  if (_.last(paramsKeyValues.value)?.id === row.id) {
+    addParam(-1)
+  }
+}
+const clearEmptyKeyValueItems = (paramsKeyValues) => {
+  return paramsKeyValues.filter((paramsKeyValue) => paramsKeyValue.key || paramsKeyValue.value)
+}
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -233,7 +243,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as HttpConnectorApi.HttpConnectorVO
-    data.params = JSON.stringify(paramsKeyValues.value)
+    data.params = JSON.stringify(clearEmptyKeyValueItems(paramsKeyValues.value))
     if (formType.value === 'create') {
       await HttpConnectorApi.createHttpConnector(data)
       message.success(t('common.createSuccess'))
