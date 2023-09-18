@@ -59,11 +59,6 @@
                   </el-row>
                   <el-tabs>
                     <el-tab-pane label="Params" :style="{ height: '40vh' }">
-                      <vxe-toolbar>
-                        <template #buttons>
-                          <vxe-button @click="addParam(-1)">在最后行插入</vxe-button>
-                        </template>
-                      </vxe-toolbar>
                       <vxe-table
                         border
                         ref="paramsTableRef"
@@ -82,7 +77,7 @@
                           :edit-render="{ autofocus: '.vxe-input--inner' }"
                         >
                           <template #edit="{ row }">
-                            <vxe-input v-model="row.key" type="text" />
+                            <vxe-input v-model="row.key" placeholder="Key" type="text" />
                           </template>
                         </vxe-column>
                         <vxe-column
@@ -91,7 +86,16 @@
                           :edit-render="{ autofocus: '.vxe-input--inner' }"
                         >
                           <template #edit="{ row }">
-                            <vxe-input v-model="row.value" type="text" />
+                            <vxe-input v-model="row.value" placeholder="Value" type="text" />
+                          </template>
+                        </vxe-column>
+                        <vxe-column title="操作" width="60" show-overflow>
+                          <template #default="{ row }">
+                            <vxe-button
+                              type="text"
+                              icon="vxe-icon-delete"
+                              @click="removeParam(row)"
+                            />
                           </template>
                         </vxe-column>
                       </vxe-table>
@@ -222,6 +226,13 @@ const addParam = async (row?: KeyValueItem | number) => {
     paramsKeyValues.value.push(newKeyValueItem)
     const { row: newRow } = await $table.insertAt(newKeyValueItem, row)
     await $table.setEditCell(newRow, 'key')
+  }
+}
+const removeParam = async (row: KeyValueItem | number) => {
+  paramsKeyValues.value = _.reject(paramsKeyValues.value, { id: row.id })
+  const $table = paramsTableRef.value
+  if ($table) {
+    $table.remove(row)
   }
 }
 const editClosedEvent: VxeTableEvents.EditClosed = ({ row, column }) => {
