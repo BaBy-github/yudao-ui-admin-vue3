@@ -163,11 +163,9 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await HttpConnectorApi.getHttpConnector(id)
       paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', []))
-      nextTick(() => {
-        if (paramsKeyValuesEditorRef) {
-          paramsKeyValuesEditorRef.value.addKeyValueItem(-1)
-        }
-      })
+      if (paramsKeyValuesEditorRef) {
+        paramsKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)
+      }
     } finally {
       formLoading.value = false
     }

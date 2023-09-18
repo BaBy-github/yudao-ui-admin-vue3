@@ -64,6 +64,11 @@ const addKeyValueItem = async (row?: KeyValueItem | number) => {
     await $table.setEditCell(newRow, 'key')
   }
 }
+const addKeyValueItemNextTick = (row?: KeyValueItem | number) => {
+  nextTick(() => {
+    addKeyValueItem(row)
+  })
+}
 const removeKeyValueItem = async (row: KeyValueItem | number) => {
   currentValue.value = _.reject(currentValue.value, { id: row.id })
   const $table = keyValueTableRef.value
@@ -79,5 +84,5 @@ const editClosedEvent: VxeTableEvents.EditClosed = ({ row, column }) => {
 const getNotEmptyKeyValueItems = () => {
   return _.filter(currentValue.value, (keyValueItem) => keyValueItem.key || keyValueItem.value)
 }
-defineExpose({ addKeyValueItem, getNotEmptyKeyValueItems }) // 提供 新增 方法，用于新增行
+defineExpose({ addKeyValueItem, addKeyValueItemNextTick, getNotEmptyKeyValueItems }) // 提供 新增 方法，用于新增行
 </script>
