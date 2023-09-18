@@ -61,8 +61,13 @@
                     <el-tab-pane label="Params" :style="{ height: '40vh' }">
                       <key-value-editor v-model="paramsKeyValues" ref="paramsKeyValuesEditorRef" />
                     </el-tab-pane>
-                    <el-tab-pane label="Headers" :style="{ height: '30vh' }">1</el-tab-pane>
-                    <el-tab-pane label="Body" :style="{ height: '30vh' }">1</el-tab-pane>
+                    <el-tab-pane label="Headers" :style="{ height: '40vh' }">
+                      <key-value-editor
+                        v-model="headersKeyValues"
+                        ref="headersKeyValuesEditorRef"
+                      />
+                    </el-tab-pane>
+                    <el-tab-pane label="Body" :style="{ height: '40vh' }">1</el-tab-pane>
                   </el-tabs>
                 </el-card>
               </el-header>
@@ -162,9 +167,13 @@ const open = async (type: string, id?: number) => {
     // formLoading.value = true
     try {
       formData.value = await HttpConnectorApi.getHttpConnector(id)
-      paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', []))
+      paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', '[]'))
       if (paramsKeyValuesEditorRef) {
         paramsKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)
+      }
+      headersKeyValues.value = JSON.parse(_.get(formData, 'value.headers', '[]'))
+      if (headersKeyValuesEditorRef) {
+        headersKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)
       }
     } finally {
       formLoading.value = false
@@ -176,9 +185,9 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** Params */
 const paramsKeyValues = ref<KeyValueItem[]>([])
 const paramsKeyValuesEditorRef = ref()
-const clearEmptyKeyValueItems = (paramsKeyValues) => {
-  return paramsKeyValues.filter((paramsKeyValue) => paramsKeyValue.key || paramsKeyValue.value)
-}
+/** Headers */
+const headersKeyValues = ref<KeyValueItem[]>([])
+const headersKeyValuesEditorRef = ref()
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
