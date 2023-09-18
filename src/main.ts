@@ -22,6 +22,10 @@ import { setupFormCreate } from '@/plugins/formCreate'
 // 引入全局样式
 import '@/styles/index.scss'
 
+// 引入 vxe-table
+import VXETable from 'vxe-table'
+import 'vxe-table/lib/style.css'
+
 // 引入动画
 import '@/plugins/animate.css'
 
@@ -61,6 +65,8 @@ const setupAll = async () => {
   setupAuth(app)
 
   await router.isReady()
+
+  app.use(VXETable)
 
   app.use(VueDOMPurifyHTML)
 

@@ -5,55 +5,148 @@
     width="100%"
     :style="{ height: '100vh' }"
   >
-    <el-form
-      ref="formRef"
-      :model="formData"
-      :rules="formRules"
-      label-width="100px"
-      v-loading="formLoading"
-    >
-      <el-form-item label="连接器名" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入连接器名" />
-      </el-form-item>
-      <el-form-item label="请求方法" prop="method">
-        <el-select v-model="formData.method" placeholder="请选择请求方法">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.HTTP_METHOD_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="请求地址" prop="url">
-        <el-input v-model="formData.url" placeholder="请输入请求地址" />
-      </el-form-item>
-      <el-form-item label="请求头" prop="headers">
-        <el-input v-model="formData.headers" type="textarea" placeholder="请输入请求头" />
-      </el-form-item>
-      <el-form-item label="请求参数" prop="params">
-        <el-input v-model="formData.params" type="textarea" placeholder="请输入请求参数" />
-      </el-form-item>
-      <el-form-item label="请求体" prop="body">
-        <el-input v-model="formData.body" type="textarea" placeholder="请输入请求体" />
-      </el-form-item>
-      <el-form-item label="响应" prop="response">
-        <el-input v-model="formData.response" placeholder="请输入响应" />
-      </el-form-item>
-      <el-form-item label="描述">
-        <Editor v-model="formData.description" height="150px" />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-radio-group v-model="formData.status">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
+    <el-form ref="formRef" :model="formData" :rules="formRules" v-loading="formLoading">
+      <el-container>
+        <el-header class="action-bar" height="5vh" :style="{ padding: '0 0 1vh 0' }">
+          <el-row>
+            <el-col :span="2">
+              <el-dropdown @command="selectSettingCommand">
+                <el-button type="info" plain>
+                  <Icon icon="fa-solid:bars" />
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="rename">重命名</el-dropdown-item>
+                    <el-dropdown-item command="b">Action 2</el-dropdown-item>
+                    <el-dropdown-item command="c">Action 3</el-dropdown-item>
+                    <el-dropdown-item command="e" divided>font size</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </el-col>
+            <el-col :offset="19" :span="3" class="runtime-buttons">
+              <el-tooltip content="运行">
+                <el-button @click="execute" type="success" plain>
+                  <Icon icon="fa-solid:play" />
+                </el-button>
+              </el-tooltip>
+            </el-col>
+          </el-row>
+        </el-header>
+        <el-container class="editor">
+          <el-main class="params-editor" :style="{ padding: 0 }">
+            <el-container>
+              <el-header height="76vh" :style="{ padding: 0 }">
+                <el-card>
+                  <el-row>
+                    <el-col :span="4">
+                      <el-select
+                        v-model="formData.method"
+                        placeholder="请选择请求方法"
+                        size="large"
+                      >
+                        <el-option
+                          v-for="dict in getIntDictOptions(DICT_TYPE.HTTP_METHOD_TYPE)"
+                          :key="dict.value"
+                          :label="dict.label"
+                          :value="dict.value"
+                        />
+                      </el-select>
+                    </el-col>
+                    <el-col :span="20">
+                      <el-input v-model="formData.url" placeholder="请输入请求地址" size="large" />
+                    </el-col>
+                  </el-row>
+                  <el-tabs>
+                    <el-tab-pane label="Params" :style="{ height: '40vh' }">
+                      <vxe-toolbar>
+                        <template #buttons>
+                          <vxe-button @click="addParam(-1)">在最后行插入</vxe-button>
+                        </template>
+                      </vxe-toolbar>
+                      <vxe-table
+                        border
+                        ref="paramsTableRef"
+                        show-overflow
+                        size="mini"
+                        max-height="80%"
+                        :data="paramsKeyValues"
+                        :column-config="{ resizable: true }"
+                        :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }"
+                      >
+                        <vxe-column type="seq" width="60" />
+                        <vxe-column
+                          field="key"
+                          title="Key"
+                          :edit-render="{ autofocus: '.vxe-input--inner' }"
+                        >
+                          <template #edit="{ row }">
+                            <vxe-input v-model="row.key" type="text" />
+                          </template>
+                        </vxe-column>
+                        <vxe-column
+                          field="value"
+                          title="Value"
+                          :edit-render="{ autofocus: '.vxe-input--inner' }"
+                        >
+                          <template #edit="{ row }">
+                            <vxe-input v-model="row.value" type="text" />
+                          </template>
+                        </vxe-column>
+                      </vxe-table>
+                    </el-tab-pane>
+                    <el-tab-pane label="Headers" :style="{ height: '30vh' }">1</el-tab-pane>
+                    <el-tab-pane label="Body" :style="{ height: '30vh' }">1</el-tab-pane>
+                  </el-tabs>
+                </el-card>
+              </el-header>
+            </el-container>
+          </el-main>
+          <el-aside class="code-editor" width="30%" :style="{ height: '76vh' }"> 1</el-aside>
+        </el-container>
+      </el-container>
+      <!--      <el-form-item label="连接器名" prop="name">-->
+      <!--        <el-input v-model="formData.name" placeholder="请输入连接器名" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="请求方法" prop="method">-->
+      <!--        <el-select v-model="formData.method" placeholder="请选择请求方法">-->
+      <!--          <el-option-->
+      <!--            v-for="dict in getIntDictOptions(DICT_TYPE.HTTP_METHOD_TYPE)"-->
+      <!--            :key="dict.value"-->
+      <!--            :label="dict.label"-->
+      <!--            :value="dict.value"-->
+      <!--          />-->
+      <!--        </el-select>-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="请求地址" prop="url">-->
+      <!--        <el-input v-model="formData.url" placeholder="请输入请求地址" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="请求头" prop="headers">-->
+      <!--        <el-input v-model="formData.headers" type="textarea" placeholder="请输入请求头" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="请求参数" prop="params">-->
+      <!--        <el-input v-model="formData.params" type="textarea" placeholder="请输入请求参数" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="请求体" prop="body">-->
+      <!--        <el-input v-model="formData.body" type="textarea" placeholder="请输入请求体" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="响应" prop="response">-->
+      <!--        <el-input v-model="formData.response" placeholder="请输入响应" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="描述">-->
+      <!--        <Editor v-model="formData.description" height="150px" />-->
+      <!--      </el-form-item>-->
+      <!--      <el-form-item label="状态" prop="status">-->
+      <!--        <el-radio-group v-model="formData.status">-->
+      <!--          <el-radio-->
+      <!--            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"-->
+      <!--            :key="dict.value"-->
+      <!--            :label="dict.value"-->
+      <!--          >-->
+      <!--            {{ dict.label }}-->
+      <!--          </el-radio>-->
+      <!--        </el-radio-group>-->
+      <!--      </el-form-item>-->
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -64,6 +157,9 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as HttpConnectorApi from '@/api/serverless/httpConnector'
+import VXETable, { VxeTableEvents, VxeTableInstance } from 'vxe-table'
+import * as _ from 'lodash'
+import { generateUUID } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -101,6 +197,7 @@ const open = async (type: string, id?: number) => {
     // formLoading.value = true
     try {
       formData.value = await HttpConnectorApi.getHttpConnector(id)
+      paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', []))
     } finally {
       formLoading.value = false
     }
@@ -108,6 +205,23 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
+/** Params */
+interface KeyValueItem {
+  id: number
+  key: string
+  value: string
+}
+const paramsKeyValues = ref<KeyValueItem[]>([])
+const paramsTableRef = ref<VxeTableInstance<KeyValueItem>>()
+const addParam = async (row?: KeyValueItem | number) => {
+  const $table = paramsTableRef.value
+  if ($table) {
+    const newKeyValueItem: KeyValueItem = { id: generateUUID(), key: '', value: '' }
+    paramsKeyValues.value.push(newKeyValueItem)
+    const { row: newRow } = await $table.insertAt(newKeyValueItem, row)
+    await $table.setEditCell(newRow, 'key')
+  }
+}
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -119,6 +233,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as HttpConnectorApi.HttpConnectorVO
+    data.params = JSON.stringify(paramsKeyValues.value)
     if (formType.value === 'create') {
       await HttpConnectorApi.createHttpConnector(data)
       message.success(t('common.createSuccess'))
