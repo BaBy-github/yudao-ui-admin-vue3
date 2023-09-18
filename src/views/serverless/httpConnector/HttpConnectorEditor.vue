@@ -59,46 +59,7 @@
                   </el-row>
                   <el-tabs>
                     <el-tab-pane label="Params" :style="{ height: '40vh' }">
-                      <vxe-table
-                        border
-                        ref="paramsTableRef"
-                        show-overflow
-                        size="mini"
-                        max-height="80%"
-                        :data="paramsKeyValues"
-                        :column-config="{ resizable: true }"
-                        :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }"
-                        @edit-closed="editClosedEvent"
-                      >
-                        <vxe-column type="seq" width="60" />
-                        <vxe-column
-                          field="key"
-                          title="Key"
-                          :edit-render="{ autofocus: '.vxe-input--inner' }"
-                        >
-                          <template #edit="{ row }">
-                            <vxe-input v-model="row.key" placeholder="Key" type="text" />
-                          </template>
-                        </vxe-column>
-                        <vxe-column
-                          field="value"
-                          title="Value"
-                          :edit-render="{ autofocus: '.vxe-input--inner' }"
-                        >
-                          <template #edit="{ row }">
-                            <vxe-input v-model="row.value" placeholder="Value" type="text" />
-                          </template>
-                        </vxe-column>
-                        <vxe-column title="操作" width="60" show-overflow>
-                          <template #default="{ row }">
-                            <vxe-button
-                              type="text"
-                              icon="vxe-icon-delete"
-                              @click="removeParam(row)"
-                            />
-                          </template>
-                        </vxe-column>
-                      </vxe-table>
+                      <key-value-editor v-model="paramsKeyValues" ref="paramsKeyValuesEditorRef" />
                     </el-tab-pane>
                     <el-tab-pane label="Headers" :style="{ height: '30vh' }">1</el-tab-pane>
                     <el-tab-pane label="Body" :style="{ height: '30vh' }">1</el-tab-pane>
@@ -162,9 +123,8 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as HttpConnectorApi from '@/api/serverless/httpConnector'
-import VXETable, { VxeTableEvents, VxeTableInstance } from 'vxe-table'
 import * as _ from 'lodash'
-import { generateUUID } from '@/utils'
+import KeyValueEditor from '@/views/serverless/httpConnector/KeyValueEditor.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -203,7 +163,8 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await HttpConnectorApi.getHttpConnector(id)
       paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', []))
-      addParam(-1)
+      if (!paramsKeyValuesEditorRef) return
+      // await paramsKeyValuesEditorRef.value.addKeyValueItem(-1)  TODO:新增末尾行
     } finally {
       formLoading.value = false
     }
@@ -212,34 +173,8 @@ const open = async (type: string, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** Params */
-interface KeyValueItem {
-  id: number
-  key: string
-  value: string
-}
 const paramsKeyValues = ref<KeyValueItem[]>([])
-const paramsTableRef = ref<VxeTableInstance<KeyValueItem>>()
-const addParam = async (row?: KeyValueItem | number) => {
-  const $table = paramsTableRef.value
-  if ($table) {
-    const newKeyValueItem: KeyValueItem = { id: generateUUID(), key: '', value: '' }
-    paramsKeyValues.value.push(newKeyValueItem)
-    const { row: newRow } = await $table.insertAt(newKeyValueItem, row)
-    await $table.setEditCell(newRow, 'key')
-  }
-}
-const removeParam = async (row: KeyValueItem | number) => {
-  paramsKeyValues.value = _.reject(paramsKeyValues.value, { id: row.id })
-  const $table = paramsTableRef.value
-  if ($table) {
-    $table.remove(row)
-  }
-}
-const editClosedEvent: VxeTableEvents.EditClosed = ({ row, column }) => {
-  if (_.last(paramsKeyValues.value)?.id === row.id) {
-    addParam(-1)
-  }
-}
+const paramsKeyValuesEditorRef = ref()
 const clearEmptyKeyValueItems = (paramsKeyValues) => {
   return paramsKeyValues.filter((paramsKeyValue) => paramsKeyValue.key || paramsKeyValue.value)
 }
@@ -254,7 +189,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as HttpConnectorApi.HttpConnectorVO
-    data.params = JSON.stringify(clearEmptyKeyValueItems(paramsKeyValues.value))
+    data.params = JSON.stringify(paramsKeyValuesEditorRef.value.getNotEmptyKeyValueItems())
     if (formType.value === 'create') {
       await HttpConnectorApi.createHttpConnector(data)
       message.success(t('common.createSuccess'))
