@@ -4,7 +4,7 @@
     ref="keyValueTableRef"
     show-overflow
     size="mini"
-    max-height="80%"
+    max-height="100%"
     :data="currentValue"
     :column-config="{ resizable: true }"
     :edit-config="{ trigger: 'click', mode: 'cell', showStatus: true }"

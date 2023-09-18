@@ -163,8 +163,11 @@ const open = async (type: string, id?: number) => {
     try {
       formData.value = await HttpConnectorApi.getHttpConnector(id)
       paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', []))
-      if (!paramsKeyValuesEditorRef) return
-      // await paramsKeyValuesEditorRef.value.addKeyValueItem(-1)  TODO:新增末尾行
+      nextTick(() => {
+        if (paramsKeyValuesEditorRef) {
+          paramsKeyValuesEditorRef.value.addKeyValueItem(-1)
+        }
+      })
     } finally {
       formLoading.value = false
     }
