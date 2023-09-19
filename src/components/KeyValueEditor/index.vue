@@ -45,7 +45,7 @@ interface KeyValueItem {
   key: string
   value: string
 }
-const currentValue = computed<NewsItem>({
+const currentValue = computed<KeyValueItem[]>({
   get() {
     return props.modelValue
   },
