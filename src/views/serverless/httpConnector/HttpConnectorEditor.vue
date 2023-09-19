@@ -219,15 +219,15 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    name: undefined,
-    method: undefined,
-    url: undefined,
-    headers: undefined,
-    params: undefined,
+    name: '',
+    method: 0,
+    url: '',
+    headers: '[]',
+    params: '[]',
     body: undefined,
     response: undefined,
-    description: undefined,
-    status: undefined
+    description: 'undefined',
+    status: 0
   }
   formRef.value?.resetFields()
 }
