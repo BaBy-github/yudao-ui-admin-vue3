@@ -76,8 +76,11 @@ const removeKeyValueItem = async (row: KeyValueItem | number) => {
     $table.remove(row)
   }
 }
+const isEmptyKeyValueItem = (keyValueItem: KeyValueItem) => {
+  return _.isEmpty(keyValueItem.key) && _.isEmpty(keyValueItem.value)
+}
 const editClosedEvent: VxeTableEvents.EditClosed = ({ row, column }) => {
-  if (_.last(currentValue.value)?.id === row.id) {
+  if (_.last(currentValue.value)?.id === row.id && !isEmptyKeyValueItem(row)) {
     addKeyValueItem(-1)
   }
 }
