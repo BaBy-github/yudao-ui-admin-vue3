@@ -129,7 +129,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as HttpConnectorApi from '@/api/serverless/httpConnector'
 import * as _ from 'lodash'
-import KeyValueEditor from '@/views/serverless/httpConnector/KeyValueEditor.vue'
+import KeyValueEditor from '@/components/KeyValueEditor/index.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
