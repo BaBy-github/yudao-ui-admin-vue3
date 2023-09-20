@@ -49,7 +49,7 @@
                           v-for="dict in getIntDictOptions(DICT_TYPE.HTTP_METHOD_TYPE)"
                           :key="dict.value"
                           :label="dict.label"
-                          :value="dict.value"
+                          :value="dict.label"
                         />
                       </el-select>
                     </el-col>
@@ -67,7 +67,9 @@
                         ref="headersKeyValuesEditorRef"
                       />
                     </el-tab-pane>
-                    <el-tab-pane label="Body" :style="{ height: '40vh' }">1</el-tab-pane>
+                    <el-tab-pane label="Body" :style="{ height: '40vh' }">
+                      <monaco-editor v-model="formData.body" :style="{ height: '40vh' }" />
+                    </el-tab-pane>
                   </el-tabs>
                 </el-card>
               </el-header>
@@ -188,6 +190,10 @@ const paramsKeyValuesEditorRef = ref()
 /** Headers */
 const headersKeyValues = ref<KeyValueItem[]>([])
 const headersKeyValuesEditorRef = ref()
+
+/** 执行连接器 */
+const execute = () => {}
+
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -220,7 +226,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    method: 0,
+    method: 'GET',
     url: '',
     headers: '[]',
     params: '[]',
