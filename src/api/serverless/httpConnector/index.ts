@@ -13,6 +13,19 @@ export interface HttpConnectorVO {
   status: byte
 }
 
+export interface HttpConnectorExecuteVO {
+  method: string
+  url: string
+  headers: string
+  params: string
+  body: string
+}
+
+// 执行HTTP连接器
+export const executeHttpConnector = async (data: HttpConnectorExecuteVO) => {
+  return await request.post({ url: `/serverless/http-connector/execute`, data })
+}
+
 // 查询HTTP连接器列表
 export const getHttpConnectorPage = async (params) => {
   return await request.get({ url: `/serverless/http-connector/page`, params })

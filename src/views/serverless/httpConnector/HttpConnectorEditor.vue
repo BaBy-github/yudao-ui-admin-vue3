@@ -1,6 +1,6 @@
 <template>
   <Dialog
-    :title="'云函数' + formData.name + (isOutstandingCloudFunction ? '<outstanding>' : '')"
+    :title="'云函数' + formData.name"
     v-model="dialogVisible"
     width="100%"
     :style="{ height: '100vh' }"
@@ -33,50 +33,65 @@
             </el-col>
           </el-row>
         </el-header>
-        <el-container class="editor">
-          <el-main class="params-editor" :style="{ padding: 0 }">
-            <el-container>
-              <el-header height="76vh" :style="{ padding: 0 }">
-                <el-card>
-                  <el-row>
-                    <el-col :span="4">
-                      <el-select
-                        v-model="formData.method"
-                        placeholder="请选择请求方法"
-                        size="large"
-                      >
-                        <el-option
-                          v-for="dict in getIntDictOptions(DICT_TYPE.HTTP_METHOD_TYPE)"
-                          :key="dict.value"
-                          :label="dict.label"
-                          :value="dict.label"
+        <el-main class="params-editor" :style="{ padding: 0 }">
+          <el-container class="editor">
+            <el-main class="params-editor" :style="{ padding: 0 }">
+              <el-container>
+                <el-header height="50vh" :style="{ padding: 0 }">
+                  <el-card>
+                    <el-row>
+                      <el-col :span="4">
+                        <el-select
+                          v-model="formData.method"
+                          placeholder="请选择请求方法"
+                          size="large"
+                        >
+                          <el-option
+                            v-for="dict in getIntDictOptions(DICT_TYPE.HTTP_METHOD_TYPE)"
+                            :key="dict.value"
+                            :label="dict.label"
+                            :value="dict.label"
+                          />
+                        </el-select>
+                      </el-col>
+                      <el-col :span="20">
+                        <el-input
+                          v-model="formData.url"
+                          placeholder="请输入请求地址"
+                          size="large"
                         />
-                      </el-select>
-                    </el-col>
-                    <el-col :span="20">
-                      <el-input v-model="formData.url" placeholder="请输入请求地址" size="large" />
-                    </el-col>
-                  </el-row>
-                  <el-tabs>
-                    <el-tab-pane label="Params" :style="{ height: '40vh' }">
-                      <key-value-editor v-model="paramsKeyValues" ref="paramsKeyValuesEditorRef" />
-                    </el-tab-pane>
-                    <el-tab-pane label="Headers" :style="{ height: '40vh' }">
-                      <key-value-editor
-                        v-model="headersKeyValues"
-                        ref="headersKeyValuesEditorRef"
-                      />
-                    </el-tab-pane>
-                    <el-tab-pane label="Body" :style="{ height: '40vh' }">
-                      <monaco-editor v-model="formData.body" :style="{ height: '40vh' }" />
-                    </el-tab-pane>
-                  </el-tabs>
-                </el-card>
-              </el-header>
-            </el-container>
-          </el-main>
-          <el-aside class="code-editor" width="30%" :style="{ height: '76vh' }"> 1</el-aside>
-        </el-container>
+                      </el-col>
+                    </el-row>
+                    <el-tabs>
+                      <el-tab-pane label="Params" :style="{ height: '30vh' }">
+                        <key-value-editor
+                          v-model="paramsKeyValues"
+                          ref="paramsKeyValuesEditorRef"
+                        />
+                      </el-tab-pane>
+                      <el-tab-pane label="Headers" :style="{ height: '30vh' }">
+                        <key-value-editor
+                          v-model="headersKeyValues"
+                          ref="headersKeyValuesEditorRef"
+                        />
+                      </el-tab-pane>
+                      <el-tab-pane label="Body" :style="{ height: '30vh' }">
+                        <monaco-editor v-model="formData.body" />
+                      </el-tab-pane>
+                    </el-tabs>
+                  </el-card>
+                </el-header>
+                <el-main height="26vh" :style="{ padding: 0 }">
+                  <el-card>
+                    <template #header> respond </template>
+                    <div>{{ executeResult }}</div>
+                  </el-card>
+                </el-main>
+              </el-container>
+            </el-main>
+            <el-aside class="code-editor" width="30%" :style="{ height: '76vh' }"> 1</el-aside>
+          </el-container>
+        </el-main>
       </el-container>
       <!--      <el-form-item label="连接器名" prop="name">-->
       <!--        <el-input v-model="formData.name" placeholder="请输入连接器名" />-->
@@ -141,16 +156,16 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: undefined,
-  name: undefined,
-  method: undefined,
-  url: undefined,
-  headers: undefined,
-  params: undefined,
-  body: undefined,
-  response: undefined,
-  description: undefined,
-  status: undefined
+  id: 0,
+  name: '',
+  method: 'GET',
+  url: '',
+  headers: '[]',
+  params: '[]',
+  body: '',
+  response: '',
+  description: '',
+  status: 0
 })
 const formRules = reactive({
   name: [{ required: true, message: '连接器名不能为空', trigger: 'blur' }],
@@ -192,7 +207,23 @@ const headersKeyValues = ref<KeyValueItem[]>([])
 const headersKeyValuesEditorRef = ref()
 
 /** 执行连接器 */
-const execute = () => {}
+interface ExecuteResult {
+  httpStatus: number
+  httpResult: object
+  body: string
+}
+const executeResult = ref<string>('')
+const execute = async () => {
+  const resp: ExecuteResult = await HttpConnectorApi.executeHttpConnector({
+    params: JSON.stringify(paramsKeyValuesEditorRef.value.getNotEmptyKeyValueItems()),
+    headers: JSON.stringify(headersKeyValuesEditorRef.value.getNotEmptyKeyValueItems()),
+    body: formData.value.body,
+    method: formData.value.method,
+    url: formData.value.url
+  })
+  console.log(resp)
+  executeResult.value = resp.body
+}
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -206,6 +237,7 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as HttpConnectorApi.HttpConnectorVO
     data.params = JSON.stringify(paramsKeyValuesEditorRef.value.getNotEmptyKeyValueItems())
+    data.headers = JSON.stringify(headersKeyValuesEditorRef.value.getNotEmptyKeyValueItems())
     if (formType.value === 'create') {
       await HttpConnectorApi.createHttpConnector(data)
       message.success(t('common.createSuccess'))
@@ -230,9 +262,9 @@ const resetForm = () => {
     url: '',
     headers: '[]',
     params: '[]',
-    body: undefined,
-    response: undefined,
-    description: 'undefined',
+    body: '',
+    response: '',
+    description: '',
     status: 0
   }
   formRef.value?.resetFields()
