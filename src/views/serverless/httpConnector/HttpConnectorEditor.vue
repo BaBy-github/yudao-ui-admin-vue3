@@ -37,7 +37,7 @@
           <el-container class="editor">
             <el-main class="params-editor" :style="{ padding: 0 }">
               <el-container>
-                <el-header height="50vh" :style="{ padding: 0 }">
+                <el-header height="48vh" :style="{ padding: 0 }">
                   <el-card>
                     <el-row>
                       <el-col :span="4">
@@ -81,10 +81,9 @@
                     </el-tabs>
                   </el-card>
                 </el-header>
-                <el-main height="26vh" :style="{ padding: 0 }">
+                <el-main :style="{ padding: 0 }">
                   <el-card>
-                    <template #header> respond </template>
-                    <div>{{ executeResult }}</div>
+                    <monaco-editor v-model="executeResponseBody" />
                   </el-card>
                 </el-main>
               </el-container>
@@ -212,7 +211,7 @@ interface ExecuteResult {
   httpResult: object
   body: string
 }
-const executeResult = ref<string>('')
+const executeResponseBody = ref<string>('')
 const execute = async () => {
   const resp: ExecuteResult = await HttpConnectorApi.executeHttpConnector({
     params: JSON.stringify(paramsKeyValuesEditorRef.value.getNotEmptyKeyValueItems()),
@@ -221,8 +220,7 @@ const execute = async () => {
     method: formData.value.method,
     url: formData.value.url
   })
-  console.log(resp)
-  executeResult.value = resp.body
+  executeResponseBody.value = resp.body
 }
 
 /** 提交表单 */
