@@ -56,10 +56,10 @@
                     <el-col :offset="21" :span="3">
                       <el-radio-group v-model="jsonSchemaViewer" size="small" style="margin: 0">
                         <el-radio-button label="monacoEditor"
-                          ><Icon icon="fa-solid:list-ol" size="12"
+                          ><Icon icon="fa-solid:list-ol" :size="12"
                         /></el-radio-button>
                         <el-radio-button label="jsonSchemaEditor"
-                          ><Icon icon="fa-solid:spell-check" size="12"
+                          ><Icon icon="fa-solid:spell-check" :size="12"
                         /></el-radio-button>
                       </el-radio-group>
                     </el-col>
@@ -140,10 +140,7 @@
 </template>
 <script setup lang="ts">
 import * as DataModelApi from '@/api/bpm/dataModel'
-import 'json-schema-editor-vue/lib/json-schema-editor-vue.css'
-import { validateJsonSchema, ValidateReqVO, ValidateResult } from '@/api/bpm/dataModel'
-import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
-import * as _ from 'lodash'
+import { ValidateReqVO, ValidateResult } from '@/api/bpm/dataModel'
 import { ElNotification } from 'element-plus'
 
 const { t } = useI18n() // 国际化
