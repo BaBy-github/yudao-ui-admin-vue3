@@ -21,7 +21,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as HttpReceiverApi from '@/api/serverless/httpReceiver'
+import * as HttpReceiverApi from '@/api/bpm/httpReceiver'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

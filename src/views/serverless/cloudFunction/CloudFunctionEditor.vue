@@ -243,12 +243,12 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
+import * as CloudFunctionApi from '@/api/bpm/cloudFunction'
 import * as _ from 'lodash'
 import { number, string } from 'vue-types'
 import { ElNotification, TabPaneName } from 'element-plus'
 import { generateUUID } from '@/utils'
-import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
+import { CloudFunctionVO } from '@/api/bpm/cloudFunction'
 import * as DataModelApi from '@/api/bpm/dataModel'
 import component from '*.vue'
 import { ValidateResult } from '@/api/bpm/dataModel'

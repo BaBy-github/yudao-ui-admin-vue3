@@ -123,11 +123,11 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
+import * as CloudFunctionApi from '@/api/bpm/cloudFunction'
 import CloudFunctionForm from './CloudFunctionForm.vue'
 import CloudFunctionEditor from './CloudFunctionEditor.vue'
 import { handleTree } from '@/utils/tree'
-import { CloudFunctionVO } from '@/api/serverless/cloudFunction'
+import { CloudFunctionVO } from '@/api/bpm/cloudFunction'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

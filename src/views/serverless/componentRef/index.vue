@@ -112,7 +112,7 @@
 <script setup lang="ts" name="ComponentRef">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as ComponentRefApi from '@/api/serverless/componentRef'
+import * as ComponentRefApi from '@/api/bpm/componentRef'
 import ComponentRefForm from './ComponentRefForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

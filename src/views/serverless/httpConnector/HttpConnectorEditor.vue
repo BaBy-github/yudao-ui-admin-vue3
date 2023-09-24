@@ -143,7 +143,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as HttpConnectorApi from '@/api/serverless/httpConnector'
+import * as HttpConnectorApi from '@/api/bpm/httpConnector'
 import * as _ from 'lodash'
 import KeyValueEditor from '@/components/KeyValueEditor/index.vue'
 

@@ -21,7 +21,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as ComponentRefApi from '@/api/serverless/componentRef'
+import * as ComponentRefApi from '@/api/bpm/componentRef'
 import { number, string } from 'vue-types'
 
 const { t } = useI18n() // 国际化

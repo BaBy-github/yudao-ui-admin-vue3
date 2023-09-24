@@ -39,7 +39,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as CloudFunctionApi from '@/api/serverless/cloudFunction'
+import * as CloudFunctionApi from '@/api/bpm/cloudFunction'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

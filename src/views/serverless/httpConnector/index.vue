@@ -162,8 +162,8 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as HttpConnectorApi from '@/api/serverless/httpConnector'
-import HttpConnectorEditor from '@/views/serverless/httpConnector/HttpConnectorEditor.vue'
+import * as HttpConnectorApi from '@/api/bpm/httpConnector'
+import HttpConnectorEditor from '@/views/bpm/httpConnector/HttpConnectorEditor.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

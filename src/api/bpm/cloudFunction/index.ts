@@ -17,40 +17,40 @@ export interface CloudFunctionExecuteVO {
 
 // 执行云函数
 export async function executeCloudFunction(data: CloudFunctionExecuteVO) {
-  return await request.post({ url: `/serverless/cloud-function/execute`, data })
+  return await request.post({ url: `/bpm/cloud-function/execute`, data })
 }
 
 // 查询云函数列表
 export const getCloudFunctionPage = async (params) => {
-  return await request.get({ url: `/serverless/cloud-function/page`, params })
+  return await request.get({ url: `/bpm/cloud-function/page`, params })
 }
 
 // 查询菜单列表
 export const getCloudFunctionList = (params) => {
-  return request.get({ url: '/serverless/cloud-function/list', params })
+  return request.get({ url: '/bpm/cloud-function/list', params })
 }
 
 // 查询云函数详情
 export const getCloudFunction = async (id: number) => {
-  return await request.get({ url: `/serverless/cloud-function/get?id=` + id })
+  return await request.get({ url: `/bpm/cloud-function/get?id=` + id })
 }
 
 // 新增云函数
 export const createCloudFunction = async (data: CloudFunctionVO) => {
-  return await request.post({ url: `/serverless/cloud-function/create`, data })
+  return await request.post({ url: `/bpm/cloud-function/create`, data })
 }
 
 // 修改云函数
 export const updateCloudFunction = async (data: CloudFunctionVO) => {
-  return await request.put({ url: `/serverless/cloud-function/update`, data })
+  return await request.put({ url: `/bpm/cloud-function/update`, data })
 }
 
 // 删除云函数
 export const deleteCloudFunction = async (id: number) => {
-  return await request.delete({ url: `/serverless/cloud-function/delete?id=` + id })
+  return await request.delete({ url: `/bpm/cloud-function/delete?id=` + id })
 }
 
 // 导出云函数 Excel
 export const exportCloudFunction = async (params) => {
-  return await request.download({ url: `/serverless/cloud-function/export-excel`, params })
+  return await request.download({ url: `/bpm/cloud-function/export-excel`, params })
 }

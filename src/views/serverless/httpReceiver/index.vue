@@ -102,7 +102,7 @@
 <script setup lang="ts" name="HttpReceiver">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as HttpReceiverApi from '@/api/serverless/httpReceiver'
+import * as HttpReceiverApi from '@/api/bpm/httpReceiver'
 import HttpReceiverForm from './HttpReceiverForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
