@@ -1,5 +1,5 @@
 <template>
-  {{ selectedComponentType }}: {{ selectedComponentId }}
+  {{ selectedComponentType }}:{{ selectedComponentId }}
   <el-space wrap :size="20">
     <el-select v-model="selectedComponentType" class="m-2" placeholder="Select">
       <el-option
@@ -12,7 +12,6 @@
     <el-input v-model="selectedComponentId" />
     <el-button :icon="Search" circle @click="searchComponent" />
     <Dialog title="搜索组件" width="100%" :style="{ height: '100vh' }" v-model="dialogVisible">
-      {{ selectedComponentType }}
       <data-model-search
         v-if="selectedComponentType === 'DataModel'"
         @update:selected-id="updateSelectedComponentId"
@@ -21,10 +20,10 @@
         v-else-if="selectedComponentType === 'CloudFunction'"
         @update:selected-id="updateSelectedComponentId"
       />
-      <!--      <http-connector-search-->
-      <!--        v-else-if="selectedComponentType === 'HttpConnector'"-->
-      <!--        @update:selected-id="updateSelectedComponentId"-->
-      <!--      />-->
+      <http-connector-search
+        v-else-if="selectedComponentType === 'HttpConnector'"
+        @update:selected-id="updateSelectedComponentId"
+      />
       <http-receiver-search
         v-else-if="selectedComponentType === 'HttpReceiver'"
         @update:selected-id="updateSelectedComponentId"

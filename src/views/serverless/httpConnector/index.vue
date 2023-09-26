@@ -97,7 +97,14 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      highlight-current-row
+      @current-change="selectRow"
+    >
       <el-table-column label="序号" type="index" width="70px" />
       <el-table-column label="编号" align="center" prop="id" width="150px" />
       <el-table-column label="连接器名" align="center" prop="name" width="150px" />
@@ -163,7 +170,8 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as HttpConnectorApi from '@/api/bpm/httpConnector'
-import HttpConnectorEditor from '@/views/bpm/httpConnector/HttpConnectorEditor.vue'
+import HttpConnectorEditor from '@/views/serverless/httpConnector/HttpConnectorEditor.vue'
+import { ElTable } from 'element-plus'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -243,6 +251,11 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+const emit = defineEmits(['update:selectedId'])
+const selectRow = (row) => {
+  emit('update:selectedId', row.id)
 }
 
 /** 初始化 **/
