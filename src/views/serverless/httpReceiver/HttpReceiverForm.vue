@@ -10,8 +10,11 @@
       <el-form-item label="接收器名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入接收器名" />
       </el-form-item>
-      <el-form-item label="请求体" prop="requestBody">
-        <el-input v-model="formData.requestBody" placeholder="请输入请求体" />
+      <el-form-item label="参数定义来源">
+        <el-radio-group v-model="requestBody.type" @change="updateRequestBodyType">
+          <el-radio-button label="normal">自定义</el-radio-button>
+          <el-radio-button label="component">低代码组件</el-radio-button>
+        </el-radio-group>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -35,6 +38,15 @@ const formData = ref({
   name: undefined,
   requestBody: undefined
 })
+interface RequestBodyDef {
+  type: string
+  sample: string
+  componentId: string
+}
+const requestBody = ref<RequestBodyDef>({})
+const updateRequestBodyType = (type: string) => {
+  requestBody.type = type
+}
 const formRules = reactive({
   name: [{ required: true, message: '接收器名不能为空', trigger: 'blur' }],
   requestBody: [{ required: true, message: '请求体不能为空', trigger: 'blur' }]
@@ -52,6 +64,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await HttpReceiverApi.getHttpReceiver(id)
+      requestBody.value = JSON.parse(formData.value.requestBody)
     } finally {
       formLoading.value = false
     }
@@ -70,6 +83,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as HttpReceiverApi.HttpReceiverVO
+    data.requestBody = JSON.stringify(requestBody.value)
     if (formType.value === 'create') {
       await HttpReceiverApi.createHttpReceiver(data)
       message.success(t('common.createSuccess'))
