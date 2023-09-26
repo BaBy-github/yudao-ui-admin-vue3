@@ -177,6 +177,11 @@ const handleExport = async () => {
   }
 }
 
+const emit = defineEmits(['update:selectedId'])
+const selectRow = (row) => {
+  emit('update:selectedId', row.id)
+}
+
 /** 初始化 **/
 onMounted(() => {
   getList()

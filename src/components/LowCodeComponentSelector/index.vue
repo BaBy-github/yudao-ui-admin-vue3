@@ -11,14 +11,33 @@
     </el-select>
     <el-input v-model="selectedComponentId" />
     <el-button :icon="Search" circle @click="searchComponent" />
-    <Dialog :title="搜索组件" width="100%" :style="{ height: '100vh' }" v-model="dialogVisible">
-      <data-model-search @update:selected-id="updateSelectedComponentId" />
+    <Dialog title="搜索组件" width="100%" :style="{ height: '100vh' }" v-model="dialogVisible">
+      {{ selectedComponentType }}
+      <data-model-search
+        v-if="selectedComponentType === 'DataModel'"
+        @update:selected-id="updateSelectedComponentId"
+      />
+      <cloud-function-search
+        v-else-if="selectedComponentType === 'CloudFunction'"
+        @update:selected-id="updateSelectedComponentId"
+      />
+      <!--      <http-connector-search-->
+      <!--        v-else-if="selectedComponentType === 'HttpConnector'"-->
+      <!--        @update:selected-id="updateSelectedComponentId"-->
+      <!--      />-->
+      <http-receiver-search
+        v-else-if="selectedComponentType === 'HttpReceiver'"
+        @update:selected-id="updateSelectedComponentId"
+      />
     </Dialog>
   </el-space>
 </template>
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 import DataModelSearch from '@/views/bpm/dataModel/index.vue'
+import CloudFunctionSearch from '@/views/serverless/cloudFunction/index.vue'
+import HttpConnectorSearch from '@/views/serverless/httpConnector/index.vue'
+import HttpReceiverSearch from '@/views/serverless/httpReceiver/index.vue'
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: any)

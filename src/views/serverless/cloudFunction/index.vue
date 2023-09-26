@@ -65,6 +65,8 @@
       :stripe="true"
       :show-overflow-tooltip="true"
       row-key="id"
+      highlight-current-row
+      @current-change="selectRow"
     >
       <el-table-column label="函数名" align="center" prop="name" width="150px" />
       <el-table-column label="代码" align="center" prop="code" width="150px" />
@@ -128,6 +130,7 @@ import CloudFunctionForm from './CloudFunctionForm.vue'
 import CloudFunctionEditor from './CloudFunctionEditor.vue'
 import { handleTree } from '@/utils/tree'
 import { CloudFunctionVO } from '@/api/bpm/cloudFunction'
+import { ElTable } from 'element-plus'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -226,6 +229,11 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+const emit = defineEmits(['update:selectedId'])
+const selectRow = (row) => {
+  emit('update:selectedId', row.id)
 }
 
 /** 初始化 **/
