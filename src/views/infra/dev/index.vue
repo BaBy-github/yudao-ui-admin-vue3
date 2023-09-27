@@ -1,13 +1,10 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'index'
-})
+<script lang="ts" setup>
+import LowCodeComponentSelector from '@/components/LowCodeComponentSelector/index.vue'
+const componentId = ref('')
 </script>
 
 <template>
-  <json-schema-editor />
+  <low-code-component-selector v-model="componentId" /><div>{{ componentId }}</div>
 </template>
 
 <style scoped lang="scss"></style>

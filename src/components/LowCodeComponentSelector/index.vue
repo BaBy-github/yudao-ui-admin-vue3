@@ -1,7 +1,11 @@
 <template>
-  {{ selectedComponentType }}:{{ selectedComponentId }}
   <el-space wrap :size="20">
-    <el-select v-model="selectedComponentType" class="m-2" placeholder="Select">
+    <el-select
+      v-model="selectedComponentType"
+      class="m-2"
+      placeholder="Select"
+      @change="updateComponentId"
+    >
       <el-option
         v-for="lowCodeComponentTypeOption in lowCodeComponentTypeOptions"
         :key="lowCodeComponentTypeOption.value"
@@ -9,7 +13,7 @@
         :value="lowCodeComponentTypeOption.value"
       />
     </el-select>
-    <el-input v-model="selectedComponentId" />
+    <el-input v-model="selectedComponentId" @change="updateComponentId" />
     <el-button :icon="Search" circle @click="searchComponent" />
     <Dialog title="搜索组件" width="100%" :style="{ height: '100vh' }" v-model="dialogVisible">
       <data-model-search
@@ -54,10 +58,14 @@ const lowCodeComponentTypeOptions = ref<any>([
   { lable: 'HttpConnector', value: 'HttpConnector' },
   { lable: 'HttpReceiver', value: 'HttpReceiver' }
 ])
-const selectedComponentType = ref<string>('DataModel')
+const selectedComponentType = ref<string>('')
 const selectedComponentId = ref<string>('')
 const updateSelectedComponentId = (selectedId) => {
   selectedComponentId.value = selectedId
+  updateComponentId()
+}
+const updateComponentId = () => {
+  componentId.value = `${selectedComponentType.value}:${selectedComponentId.value}`
 }
 const searchComponent = () => {
   dialogVisible.value = true

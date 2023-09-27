@@ -128,6 +128,8 @@ export enum DICT_TYPE {
   BPM_PROCESS_INSTANCE_RESULT = 'bpm_process_instance_result',
   BPM_TASK_ASSIGN_SCRIPT = 'bpm_task_assign_script',
   BPM_OA_LEAVE_TYPE = 'bpm_oa_leave_type',
+  HTTP_METHOD_TYPE = 'http_method_type',
+  LOW_CODE_COMPONENT_TYPE = 'low_code_component_type',
 
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型
@@ -169,8 +171,5 @@ export enum DICT_TYPE {
   PROMOTION_COUPON_STATUS = 'promotion_coupon_status', // 优惠劵的状态
   PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
-  PROMOTION_CONDITION_TYPE = 'promotion_condition_type', // 营销的条件类型枚举
-
-  // ========== SERVERLESS - 无服务模块 ==========
-  HTTP_METHOD_TYPE = 'http_method_type'
+  PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
 }
