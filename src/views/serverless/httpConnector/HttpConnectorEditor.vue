@@ -69,6 +69,16 @@
                           ref="paramsKeyValuesEditorRef"
                         />
                       </el-tab-pane>
+                      <el-tab-pane label="Authorization" :style="{ height: '30vh' }">
+                        <el-select v-model="authConfig.type">
+                          <el-option
+                            v-for="authConfigTypeOption in authConfigTypeOptions"
+                            :label="authConfigTypeOption.label"
+                            :key="authConfigTypeOption.value"
+                            :value="authConfigTypeOption.value"
+                          />
+                        </el-select>
+                      </el-tab-pane>
                       <el-tab-pane label="Headers" :style="{ height: '30vh' }">
                         <key-value-editor
                           v-model="headersKeyValues"
@@ -161,6 +171,7 @@ const formData = ref({
   url: '',
   headers: '[]',
   params: '[]',
+  authConfig: '',
   body: '',
   response: '',
   description: '',
@@ -204,6 +215,12 @@ const paramsKeyValuesEditorRef = ref()
 /** Headers */
 const headersKeyValues = ref<KeyValueItem[]>([])
 const headersKeyValuesEditorRef = ref()
+/** Authorization */
+const authConfigTypeOptions = ref([
+  { label: 'No Auth', value: 'noAuth' },
+  { label: 'My System Token', value: 'mySystemToken' }
+])
+const authConfig = ref<AuthConfig>({ type: 'noAuth' })
 
 /** 执行连接器 */
 interface ExecuteResult {
@@ -236,6 +253,7 @@ const submitForm = async () => {
     const data = formData.value as unknown as HttpConnectorApi.HttpConnectorVO
     data.params = JSON.stringify(paramsKeyValuesEditorRef.value.getNotEmptyKeyValueItems())
     data.headers = JSON.stringify(headersKeyValuesEditorRef.value.getNotEmptyKeyValueItems())
+    data.authConfig = JSON.stringify(authConfig.value)
     if (formType.value === 'create') {
       await HttpConnectorApi.createHttpConnector(data)
       message.success(t('common.createSuccess'))
@@ -254,13 +272,14 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
+    id: 0,
     name: '',
     method: 'GET',
     url: '',
     headers: '[]',
     params: '[]',
     body: '',
+    authConfig: '{"type":"noAuth"}',
     response: '',
     description: '',
     status: 0

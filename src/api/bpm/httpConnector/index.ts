@@ -1,16 +1,20 @@
 import request from '@/config/axios'
 
+interface AuthConfig {
+  type: string
+}
 export interface HttpConnectorVO {
   id: number
   name: string
-  method: byte
+  method: string
   url: string
   headers: string
   params: string
+  authConfig: AuthConfig
   body: string
   response: string
   description: string
-  status: byte
+  status: number
 }
 
 export interface HttpConnectorExecuteVO {
