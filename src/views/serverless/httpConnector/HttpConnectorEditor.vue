@@ -202,6 +202,8 @@ const open = async (type: string, id?: number) => {
       if (headersKeyValuesEditorRef) {
         headersKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)
       }
+      headersKeyValues.value = JSON.parse(_.get(formData, 'value.headers', '[]'))
+      authConfig.value.type = JSON.parse(_.get(formData, 'value.authConfig', '{"type":"noAuth"}"}'))
     } finally {
       formLoading.value = false
     }
@@ -221,7 +223,9 @@ const authConfigTypeOptions = ref([
   { label: 'My System Token', value: 'mySystemToken' }
 ])
 const authConfig = ref<AuthConfig>({ type: 'noAuth' })
-
+interface AuthConfig {
+  type: string
+}
 /** 执行连接器 */
 interface ExecuteResult {
   httpStatus: number

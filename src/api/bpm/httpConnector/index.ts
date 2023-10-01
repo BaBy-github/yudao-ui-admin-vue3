@@ -1,8 +1,5 @@
 import request from '@/config/axios'
 
-interface AuthConfig {
-  type: string
-}
 export interface HttpConnectorVO {
   id: number
   name: string
@@ -10,7 +7,7 @@ export interface HttpConnectorVO {
   url: string
   headers: string
   params: string
-  authConfig: AuthConfig
+  authConfig: string
   body: string
   response: string
   description: string
