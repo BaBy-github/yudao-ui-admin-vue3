@@ -203,7 +203,7 @@ const open = async (type: string, id?: number) => {
         headersKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)
       }
       headersKeyValues.value = JSON.parse(_.get(formData, 'value.headers', '[]'))
-      authConfig.value.type = JSON.parse(_.get(formData, 'value.authConfig', '{"type":"noAuth"}"}'))
+      authConfig.value.type = JSON.parse(_.get(formData, 'value.authConfig.type', 'noAuth'))
     } finally {
       formLoading.value = false
     }
@@ -222,7 +222,7 @@ const authConfigTypeOptions = ref([
   { label: 'No Auth', value: 'noAuth' },
   { label: 'My System Token', value: 'mySystemToken' }
 ])
-const authConfig = ref<AuthConfig>({ type: 'noAuth' })
+const authConfig = ref<AuthConfig>({ type: authConfigTypeOptions.value[0].value })
 interface AuthConfig {
   type: string
 }
