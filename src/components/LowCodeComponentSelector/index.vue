@@ -71,5 +71,12 @@ const searchComponent = () => {
   dialogVisible.value = true
 }
 const dialogVisible = ref<boolean>(false)
+watch(
+  () => props.modelValue,
+  (val: string) => {
+    selectedComponentType.value = val.split(':')[0]
+    selectedComponentId.value = val.split(':')[1]
+  },
+  { immediate: true }
+)
 </script>
-<script setup lang="ts"></script>
