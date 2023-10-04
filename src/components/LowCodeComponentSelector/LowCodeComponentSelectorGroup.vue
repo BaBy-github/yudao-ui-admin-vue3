@@ -13,7 +13,7 @@
 </template>
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: any
+  modelValue: string[]
 }>()
 const refreshCard = ref(true)
 const componentIds = computed<any>({

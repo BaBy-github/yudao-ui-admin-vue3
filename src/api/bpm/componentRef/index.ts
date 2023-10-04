@@ -35,3 +35,9 @@ export const deleteComponentRef = async (id: number) => {
 export const exportComponentRef = async (params) => {
   return await request.download({ url: `/bpm/component-ref/export-excel`, params })
 }
+
+export const getComponentRefList = async (componentId) => {
+  return await request.get({
+    url: `/bpm/component-ref/get-component-refs?component-id=` + componentId
+  })
+}

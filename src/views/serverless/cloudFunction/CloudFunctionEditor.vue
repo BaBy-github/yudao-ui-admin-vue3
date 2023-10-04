@@ -23,7 +23,9 @@
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item command="rename">重命名</el-dropdown-item>
-                    <el-dropdown-item command="b">Action 2</el-dropdown-item>
+                    <el-dropdown-item command="buildLowCodeComponentRef"
+                      >绑定低代码组件</el-dropdown-item
+                    >
                     <el-dropdown-item command="c">Action 3</el-dropdown-item>
                     <el-dropdown-item command="e" divided>font size</el-dropdown-item>
                   </el-dropdown-menu>
@@ -236,6 +238,10 @@
       <!--        </el-radio-group>-->
       <!--      </el-form-item>-->
     </el-form>
+    <low-code-component-ref-builder
+      ref="lowCodeComponentRefBuilderRef"
+      :self-component-id="`CloudFunction:${formData.id}`"
+    />
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">保 存</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -310,10 +316,14 @@ const selectSettingCommand = (command: string | number | object) => {
     case 'rename':
       renameCloudFunction()
       break
-    case 'setFontSize':
-      setEditorFontSize()
+    case 'buildLowCodeComponentRef':
+      buildLowCodeComponentRef()
       break
   }
+}
+const lowCodeComponentRefBuilderRef = ref() // 低代码组件绑定 Ref
+const buildLowCodeComponentRef = () => {
+  lowCodeComponentRefBuilderRef.value.open()
 }
 const renameCloudFunction = () => {
   ElMessageBox.prompt('重命名', 'Tip', {
