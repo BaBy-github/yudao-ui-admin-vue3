@@ -203,7 +203,7 @@ const open = async (type: string, id?: number) => {
         headersKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)
       }
       headersKeyValues.value = JSON.parse(_.get(formData, 'value.headers', '[]'))
-      authConfig.value.type = JSON.parse(_.get(formData, 'value.authConfig.type', 'noAuth'))
+      authConfig.value = JSON.parse(_.get(formData, 'value.authConfig', '{"type":"noAuth"}'))
     } finally {
       formLoading.value = false
     }
