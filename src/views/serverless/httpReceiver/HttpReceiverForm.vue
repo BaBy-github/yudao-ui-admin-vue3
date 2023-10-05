@@ -17,6 +17,12 @@
         </el-radio-group>
       </el-form-item>
     </el-form>
+    <el-button @click="buildLowCodeComponentRef">绑定组件</el-button>
+    <low-code-component-ref-builder
+      v-if="formData.id"
+      ref="lowCodeComponentRefBuilderRef"
+      :self-component-id="`HttpReceiver:${formData.id}`"
+    />
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -107,5 +113,10 @@ const resetForm = () => {
     requestBody: undefined
   }
   formRef.value?.resetFields()
+}
+
+const lowCodeComponentRefBuilderRef = ref() // 低代码组件绑定 Ref
+const buildLowCodeComponentRef = () => {
+  lowCodeComponentRefBuilderRef.value.open()
 }
 </script>
