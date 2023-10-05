@@ -41,3 +41,13 @@ export const getComponentRefList = async (componentId) => {
     url: `/bpm/component-ref/get-component-refs?component-id=` + componentId
   })
 }
+
+export const bindingComponentRefs = async (componentId, refComponentIds) => {
+  return await request.put({
+    url: `/bpm/component-ref/binding`,
+    data: {
+      componentId,
+      refComponentIds
+    }
+  })
+}

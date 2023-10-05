@@ -12,6 +12,9 @@
 <script setup lang="ts">
 import * as _ from 'lodash'
 import * as ComponentRefApi from '@/api/bpm/componentRef'
+import { ElMessage } from 'element-plus'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   selfComponentId: string
@@ -51,6 +54,8 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     dialogVisible.value = false
+    await ComponentRefApi.bindingComponentRefs(props.selfComponentId, formData.value.componentRefs)
+    ElMessage.success(t('common.updateSuccess'))
     // 发送操作成功的事件
     emit('success')
   } finally {
