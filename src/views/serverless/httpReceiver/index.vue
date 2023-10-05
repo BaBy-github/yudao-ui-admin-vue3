@@ -54,7 +54,14 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      highlight-current-row
+      @current-change="selectRow"
+    >
       <el-table-column label="序号" type="index" width="70px" />
       <el-table-column label="编号" align="center" prop="id" width="150px" />
       <el-table-column label="接收器名" align="center" prop="name" width="150px" />
@@ -104,6 +111,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as HttpReceiverApi from '@/api/bpm/httpReceiver'
 import HttpReceiverForm from './HttpReceiverForm.vue'
+import { ElTable } from 'element-plus'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
