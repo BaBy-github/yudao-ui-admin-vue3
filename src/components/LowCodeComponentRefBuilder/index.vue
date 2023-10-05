@@ -1,7 +1,9 @@
 <template>
   <Dialog :title="'组件绑定'" v-model="dialogVisible" width="50%">
     <el-form ref="formRef" :model="formData" :rules="formRules" v-loading="formLoading">
-      <low-code-component-selector-group v-model="formData.componentRefs" />
+      <el-scrollbar height="50vh">
+        <low-code-component-selector-group v-model="formData.componentRefs" />
+      </el-scrollbar>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
