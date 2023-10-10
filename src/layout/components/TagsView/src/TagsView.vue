@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { onMounted, watch, computed, unref, ref, nextTick } from 'vue'
+import { onMounted, watch, computed, unref, ref, nextTick, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
@@ -12,6 +12,7 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { useTemplateRefsList } from '@vueuse/core'
 import { ElScrollbar } from 'element-plus'
 import { useScrollTo } from '@/hooks/event/useScrollTo'
+import draggable from 'vuedraggable'
 
 const { getPrefixCls } = useDesign()
 
@@ -379,6 +380,124 @@ watch(
               </router-link>
             </div>
           </ContextMenu>
+        <div class="flex h-full">
+          <draggable
+            class="menu-draggable"
+            :list="visitedViews"
+            ghost-class="ghost"
+            chosen-class="chosenClass"
+            animation="300"
+            item-key="fullPath"
+            @start="onStart"
+            @end="onEnd"
+          >
+            <template #item="{ element }">
+              <ContextMenu
+                :ref="itemRefs.set"
+                :schema="[
+                  {
+                    icon: 'ep:refresh',
+                    label: t('common.reload'),
+                    disabled: selectedTag?.fullPath !== element.fullPath,
+                    command: () => {
+                      refreshSelectedTag(element)
+                    }
+                  },
+                  {
+                    icon: 'ep:close',
+                    label: t('common.closeTab'),
+                    disabled: !!visitedViews?.length && selectedTag?.meta.affix,
+                    command: () => {
+                      closeSelectedTag(element)
+                    }
+                  },
+                  {
+                    divided: true,
+                    icon: 'ep:d-arrow-left',
+                    label: t('common.closeTheLeftTab'),
+                    disabled:
+                      !!visitedViews?.length &&
+                      (element.fullPath === visitedViews[0].fullPath ||
+                        selectedTag?.fullPath !== element.fullPath),
+                    command: () => {
+                      closeLeftTags()
+                    }
+                  },
+                  {
+                    icon: 'ep:d-arrow-right',
+                    label: t('common.closeTheRightTab'),
+                    disabled:
+                      !!visitedViews?.length &&
+                      (element.fullPath === visitedViews[visitedViews.length - 1].fullPath ||
+                        selectedTag?.fullPath !== element.fullPath),
+                    command: () => {
+                      closeRightTags()
+                    }
+                  },
+                  {
+                    divided: true,
+                    icon: 'ep:discount',
+                    label: t('common.closeOther'),
+                    disabled: selectedTag?.fullPath !== element.fullPath,
+                    command: () => {
+                      closeOthersTags()
+                    }
+                  },
+                  {
+                    icon: 'ep:minus',
+                    label: t('common.closeAll'),
+                    command: () => {
+                      closeAllTags()
+                    }
+                  }
+                ]"
+                :key="element.fullPath"
+                :tag-item="element"
+                :class="[
+                  `${prefixCls}__item`,
+                  element?.meta?.affix ? `${prefixCls}__item--affix` : '',
+                  {
+                    'is-active': isActive(element)
+                  }
+                ]"
+                @visible-change="visibleChange"
+              >
+                <div>
+                  <router-link
+                    :ref="tagLinksRefs.set"
+                    :to="{ ...element }"
+                    custom
+                    v-slot="{ navigate }"
+                  >
+                    <div
+                      @click="navigate"
+                      class="h-full flex justify-center items-center whitespace-nowrap pl-15px"
+                    >
+                      <Icon
+                        v-if="
+                          element?.matched &&
+                          element?.matched[1] &&
+                          element?.matched[1]?.meta?.icon &&
+                          tagsViewIcon
+                        "
+                        :icon="element?.matched[1]?.meta?.icon"
+                        :size="12"
+                        class="mr-5px"
+                      />
+                      {{ t(element?.meta?.title as string) }}
+                      <Icon
+                        :class="`${prefixCls}__item--close`"
+                        color="#333"
+                        icon="ep:close"
+                        :size="12"
+                        @click.prevent.stop="closeSelectedTag(element)"
+                      />
+                    </div>
+                  </router-link>
+                </div>
+              </ContextMenu>
+            </template>
+          </draggable>
         </div>
       </ElScrollbar>
     </div>
@@ -581,5 +700,9 @@ $prefix-cls: #{$namespace}-tags-view;
       }
     }
   }
+}
+.menu-draggable {
+  display: flex;
+  flex-wrap: nowrap;
 }
 </style>

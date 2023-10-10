@@ -9,3 +9,4 @@ pnpm-debug
 auto-*.d.ts
 .idea
 .history
+/yarn.lock

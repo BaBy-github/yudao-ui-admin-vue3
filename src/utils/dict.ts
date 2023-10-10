@@ -136,6 +136,8 @@ export enum DICT_TYPE {
   BPM_PROCESS_INSTANCE_RESULT = 'bpm_process_instance_result',
   BPM_TASK_ASSIGN_SCRIPT = 'bpm_task_assign_script',
   BPM_OA_LEAVE_TYPE = 'bpm_oa_leave_type',
+  HTTP_METHOD_TYPE = 'http_method_type',
+  LOW_CODE_COMPONENT_TYPE = 'low_code_component_type',
 
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型

@@ -1,0 +1,122 @@
+<template>
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="100px"
+      v-loading="formLoading"
+    >
+      <el-form-item label="接收器名" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入接收器名" />
+      </el-form-item>
+      <el-form-item label="参数定义来源">
+        <el-radio-group v-model="requestBody.type" @change="updateRequestBodyType">
+          <el-radio-button label="normal">自定义</el-radio-button>
+          <el-radio-button label="component">低代码组件</el-radio-button>
+        </el-radio-group>
+      </el-form-item>
+    </el-form>
+    <el-button @click="buildLowCodeComponentRef">绑定组件</el-button>
+    <low-code-component-ref-builder
+      v-if="formData.id"
+      ref="lowCodeComponentRefBuilderRef"
+      :self-component-id="`HttpReceiver:${formData.id}`"
+    />
+    <template #footer>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+</template>
+<script setup lang="ts">
+import * as HttpReceiverApi from '@/api/bpm/httpReceiver'
+
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
+
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref({
+  id: undefined,
+  name: undefined,
+  requestBody: undefined
+})
+interface RequestBodyDef {
+  type: string
+  sample: string
+  componentId: string
+}
+const requestBody = ref<RequestBodyDef>({})
+const updateRequestBodyType = (type: string) => {
+  requestBody.type = type
+}
+const formRules = reactive({
+  name: [{ required: true, message: '接收器名不能为空', trigger: 'blur' }],
+  requestBody: [{ required: true, message: '请求体不能为空', trigger: 'blur' }]
+})
+const formRef = ref() // 表单 Ref
+
+/** 打开弹窗 */
+const open = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
+  formType.value = type
+  resetForm()
+  // 修改时，设置数据
+  if (id) {
+    formLoading.value = true
+    try {
+      formData.value = await HttpReceiverApi.getHttpReceiver(id)
+      requestBody.value = JSON.parse(formData.value.requestBody)
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const submitForm = async () => {
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as HttpReceiverApi.HttpReceiverVO
+    data.requestBody = JSON.stringify(requestBody.value)
+    if (formType.value === 'create') {
+      await HttpReceiverApi.createHttpReceiver(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await HttpReceiverApi.updateHttpReceiver(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    name: undefined,
+    requestBody: undefined
+  }
+  formRef.value?.resetFields()
+}
+
+const lowCodeComponentRefBuilderRef = ref() // 低代码组件绑定 Ref
+const buildLowCodeComponentRef = () => {
+  lowCodeComponentRefBuilderRef.value.open()
+}
+</script>
