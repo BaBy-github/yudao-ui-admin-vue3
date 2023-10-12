@@ -380,7 +380,8 @@ watch(
               </router-link>
             </div>
           </ContextMenu>
-        <div class="flex h-full">
+        </div>
+        <div class="h-full flex">
           <draggable
             class="menu-draggable"
             :list="visitedViews"
@@ -471,7 +472,7 @@ watch(
                   >
                     <div
                       @click="navigate"
-                      class="h-full flex justify-center items-center whitespace-nowrap pl-15px"
+                      class="h-full flex items-center justify-center whitespace-nowrap pl-15px"
                     >
                       <Icon
                         v-if="
