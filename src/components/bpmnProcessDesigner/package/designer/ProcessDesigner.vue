@@ -167,6 +167,12 @@
           :type="props.headerButtonType"
           :disabled="simulationStatus"
         />
+        <XButton
+          title="AI"
+          @click="ai"
+          :type="props.headerButtonType"
+          :disabled="simulationStatus"
+        />
       </template>
       <!-- 用于打开本地文件-->
       <input
@@ -244,6 +250,7 @@ import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 // const eventName = reactive({
 //   name: ''
 // })
+import * as _ from 'lodash'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -665,6 +672,50 @@ const previewProcessJson = () => {
   })
 }
 /* ------------------------------------------------ 芋道源码 methods ------------------------------------------------------ */
+const createShape = (bpmnShapeType, shapeName, x, y) => {
+  const canvas = bpmnModeler.get('canvas')
+  const elementFactory = bpmnModeler.get('elementFactory')
+  const modeling = bpmnModeler.get('modeling')
+  const rootElement = canvas.getRootElement()
+
+  let branchShape = elementFactory.createShape({
+    type: bpmnShapeType
+  })
+  branchShape.businessObject.name = shapeName
+  return modeling.createShape(branchShape, { x, y }, rootElement)
+}
+const ai = () => {
+  const modeling = bpmnModeler.get('modeling')
+  const elementRegistry = bpmnModeler.get('elementRegistry')
+
+  const commandElements = []
+  const needRemoveElements = []
+  const commands = [
+    ['createShape', 'bpmn:Task', 'task1', 300, 300],
+    ['createShape', 'bpmn:Task', 'task2', 500, 300],
+    ['getElement', 'Event_1hcva41'],
+    ['connect', 0, 1],
+    ['remove', 'Flow_0xuz86i'],
+    ['connect', 2, 0],
+    ['getElement', 'Event_1w8ql8e'],
+    ['connect', 1, 6]
+  ]
+  _.forEach(commands, (command) => {
+    let shape
+    if (command[0] === 'createShape') {
+      shape = createShape(command[1], command[2], command[3], command[4])
+    } else if (command[0] === 'getElement') {
+      shape = elementRegistry.get(command[1])
+    } else if (command[0] === 'connect') {
+      shape = modeling.connect(commandElements[command[1]], commandElements[command[2]])
+    } else if (command[0] === 'remove') {
+      shape = elementRegistry.get(command[1])
+      needRemoveElements.push(shape)
+    }
+    commandElements.push(shape)
+  })
+  modeling.removeElements(needRemoveElements)
+}
 const processSave = async () => {
   console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
   const { err, xml } = await bpmnModeler.saveXML()
