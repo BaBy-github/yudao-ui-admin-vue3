@@ -175,6 +175,7 @@
         />
         <XButton
           title="测试命令"
+          v-if="testCommands"
           @click="commandTest"
           :type="props.headerButtonType"
           :disabled="simulationStatus"
@@ -237,7 +238,7 @@
 // import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'
 // import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
 // import 'bpmn-js-properties-panel/dist/assets/bpmn-js-properties-panel.css' // 右侧框样式
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 import DefaultEmptyXML from './plugins/defaultEmpty'
 // 翻译方法
@@ -272,6 +273,7 @@ import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 import * as _ from 'lodash'
 import * as BpmAiApi from '@/api/bpm/ai'
 import ExecuteProgress from '@/components/ExecuteProgress/index.vue'
+import axios from 'axios'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -706,8 +708,19 @@ const createShape = (bpmnShapeType, shapeName, x, y) => {
   branchShape.businessObject.name = shapeName
   return modeling.createShape(branchShape, { x, y }, rootElement)
 }
+const testCommands = ref(false)
 const commandBpmn = async (commands) => {
-  console.log('commands', commands)
+  if (testCommands.value) {
+    ElNotification.success({
+      title: '绘制中',
+      dangerouslyUseHTMLString: true,
+      message: _.join(
+        _.map(commands, (command) => JSON.stringify(command)),
+        '<br/>'
+      ),
+      duration: 0
+    })
+  }
   const modeling = bpmnModeler.get('modeling')
   const elementRegistry = bpmnModeler.get('elementRegistry')
 
@@ -758,13 +771,15 @@ const commandTest = async () => {
 }
 const aiExecuteProgressRef = ref()
 const ai = async () => {
+  const file = await axios.get('/prompt/aiBpmnCanvas.txt')
+  const prompt = file.data
+
   userRequirementVisible.value = false
   const { xml } = await bpmnModeler.saveXML({ format: true })
   const messages = [
     {
       role: 'user',
-      content:
-        "你是一个精通Bpmn2.0规范和bpmn.js的AI。我需要你根据用户需求和当前的bpmn数据，生成一组命令操作。命令操作格式如下：创建图形:createShape,图形类型,图形名称,位置x,位置y;获取元素:getElement,元素id;连接元素:connect,起点元素在commandElements的下标,终点元素在commandElements的下标;删除元素:remove,元素id;以下是生成请假流程的命令示例：[['getElement', 'Event_11e5aw3'],['createShape', 'bpmn:UserTask', '部门经理审批', 350, 300],['createShape', 'bpmn:ExclusiveGateway', '判断请假天数', 500, 300],['createShape', 'bpmn:UserTask', 'HR审批', 600, 200],['createShape', 'bpmn:EndEvent', '结束', 600, 300],['connect', 0, 1],['connect', 1, 2],['connect', 2, 3],['connect', 2, 4],['connect', 3, 4],['remove', 'Event_155ac8r'],['remove', 'Flow_1v84kvc']]以下几点非常重要：1.你的回答必须是一个二维数组的字符串，我会使用JSON.parse()来解析你的回答。你的json数据应该使用双引号，并且不需要添加无关的符号比如换行符'\\n';2.connect命令也会将connect元素添加到commandElements数组;3.你能正确的分析用户的需求，当你看到用户的需求中使用了“若”或者“如果”等具有判断性的词汇，你应该使用网关元素，并且处理好每个支线的连接;4.经过你的命令操作，最终的流程图应该符合常理。除了dataObject外，所有的元素都应该被连接，特别是start和end。因此你需要适当的连接元素或移除连接;5.创建元素时应该给元素一个合适的名字;6.你的每个命令操作的元素都会被保存在commandElements数组中，你可以使用数组下标来表示要操作的元素。如果你明白了，请回复\"收到\"。"
+      content: prompt
     },
     { role: 'assistant', content: '收到' },
     {
@@ -778,12 +793,12 @@ const ai = async () => {
     temperature: 0.7
   }
   aiExecuteProgressRef.value.loading()
-  const resp = await BpmAiApi.commandBpmn(chatRequestBody)
-  console.log('ai', resp)
-  messages.push(resp.choices[0].message)
   let commands
   try {
-    commands = JSON.parse(_.last(messages).content)
+    const resp = await BpmAiApi.commandBpmn(chatRequestBody)
+    messages.push(resp.choices[0].message)
+    const commandsStr = _.last(messages).content
+    commands = JSON.parse(commandsStr.replace(/\n/g, '').replace(/'/g, '"'))
     aiExecuteProgressRef.value.success()
   } catch (e) {
     ElMessage.error('AI 解析错误')
