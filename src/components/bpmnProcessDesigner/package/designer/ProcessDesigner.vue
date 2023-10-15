@@ -173,6 +173,13 @@
           :type="props.headerButtonType"
           :disabled="simulationStatus"
         />
+        <XButton
+          title="测试命令"
+          v-if="false"
+          @click="commandTest"
+          :type="props.headerButtonType"
+          :disabled="simulationStatus"
+        />
       </template>
       <!-- 用于打开本地文件-->
       <input
@@ -699,6 +706,7 @@ const createShape = (bpmnShapeType, shapeName, x, y) => {
   return modeling.createShape(branchShape, { x, y }, rootElement)
 }
 const commandBpmn = (commands) => {
+  console.log('commands', commands)
   const modeling = bpmnModeler.get('modeling')
   const elementRegistry = bpmnModeler.get('elementRegistry')
 
@@ -722,6 +730,20 @@ const commandBpmn = (commands) => {
   modeling.removeElements(needRemoveElements)
 }
 const userRequirement = ref('我想要一个请假申请的流程。先给部门经理审批，再给HR审批')
+const commandTest = async () => {
+  const commands = [
+    ['createShape', 'bpmn:Task', '部门经理审批', 300, 300],
+    ['createShape', 'bpmn:Task', 'HR审批', 500, 300],
+    ['getElement', 'Event_1hcva41'],
+    ['connect', 0, 1],
+    ['remove', 'Flow_0xuz86i'],
+    ['connect', 2, 0],
+    ['getElement', 'Event_1w8ql8e'],
+    ['connect', 1, 6],
+    ['moveElement', 0, 0, 0]
+  ]
+  commandBpmn(commands)
+}
 const ai = async () => {
   userRequirementVisible.value = false
   const { xml } = await bpmnModeler.saveXML({ format: true })
