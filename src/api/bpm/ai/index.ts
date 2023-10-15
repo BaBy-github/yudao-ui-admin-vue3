@@ -4,7 +4,7 @@ import request from '@/config/axios'
 export const commandBpmn = async (chatRequestBody: ChatRequestBody) => {
   return await request.post({
     url: '/bpm/ai/command-bpmn',
-    data: prompt
+    data: chatRequestBody
   })
 }
 
