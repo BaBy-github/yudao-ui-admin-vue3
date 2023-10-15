@@ -251,6 +251,7 @@ import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 //   name: ''
 // })
 import * as _ from 'lodash'
+import * as BpmAiApi from '@/api/bpm/ai'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -684,22 +685,13 @@ const createShape = (bpmnShapeType, shapeName, x, y) => {
   branchShape.businessObject.name = shapeName
   return modeling.createShape(branchShape, { x, y }, rootElement)
 }
-const ai = () => {
+const commandBpmn = (commands) => {
   const modeling = bpmnModeler.get('modeling')
   const elementRegistry = bpmnModeler.get('elementRegistry')
 
   const commandElements = []
   const needRemoveElements = []
-  const commands = [
-    ['createShape', 'bpmn:Task', 'task1', 300, 300],
-    ['createShape', 'bpmn:Task', 'task2', 500, 300],
-    ['getElement', 'Event_1hcva41'],
-    ['connect', 0, 1],
-    ['remove', 'Flow_0xuz86i'],
-    ['connect', 2, 0],
-    ['getElement', 'Event_1w8ql8e'],
-    ['connect', 1, 6]
-  ]
+
   _.forEach(commands, (command) => {
     let shape
     if (command[0] === 'createShape') {
@@ -715,6 +707,35 @@ const ai = () => {
     commandElements.push(shape)
   })
   modeling.removeElements(needRemoveElements)
+}
+const ai = async () => {
+  const { xml } = await bpmnModeler.saveXML({ format: true })
+  const messages = [
+    {
+      role: 'user',
+      content:
+        '你是一个精通Bpmn2.0规范和bpmn.js的AI。你的任务是根据用户需求和当前的bpmn数据，生成一组命令操作。以下是一个示例：[ ["createShape", "bpmn:Task", "task1", 300, 300],    ["createShape", "bpmn:Task", "task2", 500, 300],    ["getElement", "Event_1hcva41"],    ["connect", 0, 1],    ["remove", "Flow_0xuz86i"],    ["connect", 2, 0],    ["getElement", "Event_1w8ql8e"],    ["connect", 1, 6]]命令操作格式如下：创建图形：createShape,图形类型,图形名称,位置x,位置y获取元素：getElement,元素id连接元素：connect,起点元素在commandElements的下标,终点元素在commandElements的下标删除元素：remove,元素id你的每个命令操作的元素都会被保存在commandElements数组中，你可以使用数组下标来表示要操作的元素。注意：1.你的回答必须是一个二维数组的字符串，我会使用JSON.parse()来解析你的回答。你的json数据应该使用双引号。2.connect命令也会将connect元素添加到commandElements3.经过你的命令操作，最终的流程图应该符合常理。因此你需要适当的连接元素或移除连接。若使用网关元素，也应该处理好每个支线的连接。除了dataObject外，所有的元素都应该被连接。4.你创建元素时应该给元素一个合适的名字。如果你明白了，请回复"收到"。'
+    },
+    { role: 'assistant', content: '收到' },
+    {
+      role: 'user',
+      content: `用户需求:我想要一个请假申请的流程，申请先给部门经理审批，若请假天数超过三天还需要另外给HR审批。bpmn数据:${xml}`
+    }
+  ]
+  const chatRequestBody = {
+    model: 'gpt-3.5-turbo-0613',
+    messages,
+    temperature: 0.7
+  }
+  const resp = await BpmAiApi.commandBpmn(chatRequestBody)
+  messages.push(resp.choices[0].message)
+  let commands
+  try {
+    commands = JSON.parse(_.last(messages).content)
+  } catch (e) {
+    ElMessage.error('AI 解析错误')
+  }
+  commandBpmn(commands)
 }
 const processSave = async () => {
   console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
