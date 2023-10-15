@@ -218,11 +218,11 @@
       </div>
     </Dialog>
     <Dialog
-      title="预览"
+      title="需求"
       v-model="userRequirementVisible"
-      width="80%"
+      width="50%"
       :scroll="true"
-      max-height="600px"
+      max-height="50vh"
     >
       <monaco-editor language="text" v-model="userRequirement" />
       <template #footer>
@@ -710,17 +710,8 @@ const createShape = (bpmnShapeType, shapeName, x, y) => {
 }
 const testCommands = ref(false)
 const commandBpmn = async (commands) => {
-  if (testCommands.value) {
-    ElNotification.success({
-      title: '绘制中',
-      dangerouslyUseHTMLString: true,
-      message: _.join(
-        _.map(commands, (command) => JSON.stringify(command)),
-        '<br/>'
-      ),
-      duration: 0
-    })
-  }
+  console.log('commands', commands)
+  ElNotification.success('开始绘制流程')
   const modeling = bpmnModeler.get('modeling')
   const elementRegistry = bpmnModeler.get('elementRegistry')
 
@@ -750,7 +741,12 @@ const sleep = async (timeout) => {
   return new Promise((resolve) => setTimeout(resolve, timeout))
 }
 const userRequirement = ref(
-  '我想要一个请假申请的流程。先给部门经理审批，再给HR审批。若请假天数超过三天还需要给总经理审批'
+  '我想要一个请假申请的流程。\n' +
+    '1.先给部门经理审批\n' +
+    '2.再给HR审批。\n' +
+    '3.HR审批完成后判断\n' +
+    '    若请假天数超过三天还需要给总经理审批\n' +
+    '    否则直接结束'
 )
 const commandTest = async () => {
   const commands = [
@@ -795,13 +791,14 @@ const ai = async () => {
   aiExecuteProgressRef.value.loading()
   let commands
   try {
+    ElNotification.info('开始分析需求')
     const resp = await BpmAiApi.commandBpmn(chatRequestBody)
     messages.push(resp.choices[0].message)
     const commandsStr = _.last(messages).content
     commands = JSON.parse(commandsStr.replace(/\n/g, '').replace(/'/g, '"'))
     aiExecuteProgressRef.value.success()
   } catch (e) {
-    ElMessage.error('AI 解析错误')
+    ElNotification.error('画板指令生成失败')
     aiExecuteProgressRef.value.error()
   }
   commandBpmn(commands)
