@@ -736,18 +736,23 @@ const commandBpmn = async (commands) => {
 const sleep = async (timeout) => {
   return new Promise((resolve) => setTimeout(resolve, timeout))
 }
-const userRequirement = ref('我想要一个请假申请的流程。先给部门经理审批，再给HR审批')
+const userRequirement = ref(
+  '我想要一个请假申请的流程。先给部门经理审批，再给HR审批。若请假天数超过三天还需要给总经理审批'
+)
 const commandTest = async () => {
   const commands = [
-    ['createShape', 'bpmn:Task', '部门经理审批', 300, 300],
-    ['createShape', 'bpmn:Task', 'HR审批', 500, 300],
-    ['getElement', 'Event_1hcva41'],
+    ['getElement', 'Event_11e5aw3'],
+    ['createShape', 'bpmn:UserTask', '部门经理审批', 350, 300],
+    ['createShape', 'bpmn:ExclusiveGateway', '判断请假天数', 500, 300],
+    ['createShape', 'bpmn:UserTask', 'HR审批', 600, 200],
+    ['createShape', 'bpmn:EndEvent', '结束', 600, 300],
     ['connect', 0, 1],
-    ['remove', 'Flow_0xuz86i'],
-    ['connect', 2, 0],
-    ['getElement', 'Event_1w8ql8e'],
-    ['connect', 1, 6],
-    ['moveElement', 0, 0, 0]
+    ['connect', 1, 2],
+    ['connect', 2, 3],
+    ['connect', 2, 4],
+    ['connect', 3, 4],
+    ['remove', 'Event_155ac8r'],
+    ['remove', 'Flow_1v84kvc']
   ]
   commandBpmn(commands)
 }
@@ -759,7 +764,7 @@ const ai = async () => {
     {
       role: 'user',
       content:
-        '你是一个精通Bpmn2.0规范和bpmn.js的AI。你的任务是根据用户需求和当前的bpmn数据，生成一组命令操作。以下是一个示例：[["createShape", "bpmn:Task", "部门经理审批", 300, 300],["createShape", "bpmn:Task", "HR审批", 500, 300],["getElement", "Event_1hcva41"],["connect", 0, 1],["remove", "Flow_0xuz86i"],["connect", 2, 0],["getElement", "Event_1w8ql8e"],["connect", 1, 6]]命令操作格式如下：创建图形:createShape,图形类型,图形名称,位置x,位置y;获取元素:getElement,元素id;连接元素:connect,起点元素在commandElements的下标,终点元素在commandElements的下标;删除元素:remove,元素id;你的每个命令操作的元素都会被保存在commandElements数组中，你可以使用数组下标来表示要操作的元素。以下几点非常重要：1.你的回答必须是一个二维数组的字符串，我会使用JSON.parse()来解析你的回答。你的json数据应该使用双引号，并且不需要添加无关的符号比如\\n2.connect命令也会将connect元素添加到commandElements数组3.经过你的命令操作，最终的流程图应该符合常理。因此你需要适当的连接元素或移除连接。若使用网关元素，也应该处理好每个支线的连接。除了dataObject外，所有的元素都应该被连接，特别是start和end。4.创建元素时应该给元素一个合适的名字。如果你明白了，请回复"收到"。'
+        "你是一个精通Bpmn2.0规范和bpmn.js的AI。我需要你根据用户需求和当前的bpmn数据，生成一组命令操作。命令操作格式如下：创建图形:createShape,图形类型,图形名称,位置x,位置y;获取元素:getElement,元素id;连接元素:connect,起点元素在commandElements的下标,终点元素在commandElements的下标;删除元素:remove,元素id;以下是生成请假流程的命令示例：[['getElement', 'Event_11e5aw3'],['createShape', 'bpmn:UserTask', '部门经理审批', 350, 300],['createShape', 'bpmn:ExclusiveGateway', '判断请假天数', 500, 300],['createShape', 'bpmn:UserTask', 'HR审批', 600, 200],['createShape', 'bpmn:EndEvent', '结束', 600, 300],['connect', 0, 1],['connect', 1, 2],['connect', 2, 3],['connect', 2, 4],['connect', 3, 4],['remove', 'Event_155ac8r'],['remove', 'Flow_1v84kvc']]以下几点非常重要：1.你的回答必须是一个二维数组的字符串，我会使用JSON.parse()来解析你的回答。你的json数据应该使用双引号，并且不需要添加无关的符号比如换行符'\\n';2.connect命令也会将connect元素添加到commandElements数组;3.你能正确的分析用户的需求，当你看到用户的需求中使用了“若”或者“如果”等具有判断性的词汇，你应该使用网关元素，并且处理好每个支线的连接;4.经过你的命令操作，最终的流程图应该符合常理。除了dataObject外，所有的元素都应该被连接，特别是start和end。因此你需要适当的连接元素或移除连接;5.创建元素时应该给元素一个合适的名字;6.你的每个命令操作的元素都会被保存在commandElements数组中，你可以使用数组下标来表示要操作的元素。如果你明白了，请回复\"收到\"。"
     },
     { role: 'assistant', content: '收到' },
     {
