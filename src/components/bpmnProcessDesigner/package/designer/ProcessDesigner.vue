@@ -487,6 +487,8 @@ const initModelListeners = () => {
       // emit(eventName, element, eventObj)
     })
   })
+  // 监听图形创建
+  EventBus.on('create.end', (event: any) => {})
   // 监听图形改变返回xml
   EventBus.on('commandStack.changed', async (event) => {
     try {
