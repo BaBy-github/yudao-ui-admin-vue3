@@ -175,7 +175,6 @@
         />
         <XButton
           title="测试命令"
-          v-if="false"
           @click="commandTest"
           :type="props.headerButtonType"
           :disabled="simulationStatus"
@@ -191,6 +190,7 @@
         @change="importLocalFile"
       />
     </div>
+    <execute-progress ref="aiExecuteProgressRef" />
     <div class="my-process-designer__container">
       <div
         class="my-process-designer__canvas"
@@ -271,6 +271,7 @@ import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 // })
 import * as _ from 'lodash'
 import * as BpmAiApi from '@/api/bpm/ai'
+import ExecuteProgress from '@/components/ExecuteProgress/index.vue'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -705,7 +706,7 @@ const createShape = (bpmnShapeType, shapeName, x, y) => {
   branchShape.businessObject.name = shapeName
   return modeling.createShape(branchShape, { x, y }, rootElement)
 }
-const commandBpmn = (commands) => {
+const commandBpmn = async (commands) => {
   console.log('commands', commands)
   const modeling = bpmnModeler.get('modeling')
   const elementRegistry = bpmnModeler.get('elementRegistry')
@@ -713,7 +714,9 @@ const commandBpmn = (commands) => {
   const commandElements = []
   const needRemoveElements = []
 
-  _.forEach(commands, (command) => {
+  // 遍历命令，获取元素 commands
+  for (let commandsIndex = 0; commandsIndex < commands.length; commandsIndex++) {
+    let command = commands[commandsIndex]
     let shape
     if (command[0] === 'createShape') {
       shape = createShape(command[1], command[2], command[3], command[4])
@@ -726,8 +729,12 @@ const commandBpmn = (commands) => {
       needRemoveElements.push(shape)
     }
     commandElements.push(shape)
-  })
+    await sleep(300)
+  }
   modeling.removeElements(needRemoveElements)
+}
+const sleep = async (timeout) => {
+  return new Promise((resolve) => setTimeout(resolve, timeout))
 }
 const userRequirement = ref('我想要一个请假申请的流程。先给部门经理审批，再给HR审批')
 const commandTest = async () => {
@@ -744,6 +751,7 @@ const commandTest = async () => {
   ]
   commandBpmn(commands)
 }
+const aiExecuteProgressRef = ref()
 const ai = async () => {
   userRequirementVisible.value = false
   const { xml } = await bpmnModeler.saveXML({ format: true })
@@ -764,14 +772,17 @@ const ai = async () => {
     messages,
     temperature: 0.7
   }
+  aiExecuteProgressRef.value.loading()
   const resp = await BpmAiApi.commandBpmn(chatRequestBody)
   console.log('ai', resp)
   messages.push(resp.choices[0].message)
   let commands
   try {
     commands = JSON.parse(_.last(messages).content)
+    aiExecuteProgressRef.value.success()
   } catch (e) {
     ElMessage.error('AI 解析错误')
+    aiExecuteProgressRef.value.error()
   }
   commandBpmn(commands)
 }
