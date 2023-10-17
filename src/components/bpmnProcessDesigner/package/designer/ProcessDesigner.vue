@@ -209,8 +209,8 @@
       :scroll="true"
       max-height="600px"
     >
-      <!-- append-to-body -->
-      <div v-highlight>
+      <monaco-editor v-if="previewType === 'xml'" language="xml" v-model="previewResult" />
+      <div v-highlight v-else>
         <code class="hljs">
           <!-- 高亮代码块 -->
           {{ previewResult }}
