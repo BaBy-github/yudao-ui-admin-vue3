@@ -87,6 +87,7 @@ import UserTaskListeners from './listeners/UserTaskListeners.vue'
 import * as _ from 'lodash'
 import ProcessElementProperties from '@/components/bpmnProcessDesigner/package/penal/properties/processElementProperties.vue'
 import { Property } from '@/api/mall/product/spu'
+import { PROCESS_PROPERTY } from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
@@ -225,20 +226,24 @@ const canBindingLowCodeComponent = computed(() =>
 const selectedDataModelComponentId = ref('')
 const updateDataObjectReferenceBindingDataModel = () => {
   const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
-  const dataModelMap: Property = _.find(processPropertyList, { name: 'data_model_map' })
+  const dataModelMap: Property = _.find(processPropertyList, {
+    name: PROCESS_PROPERTY.DATA_MODEL_MAP
+  })
 
   if (dataModelMap) {
     const dataModelMapValue = JSON.parse(dataModelMap.value)
     dataModelMapValue[elementId.value] = selectedDataModelComponentId.value
     processPropertiesEditorRef.value.saveAttributeToFirst(
-      'data_model_map',
+      PROCESS_PROPERTY.DATA_MODEL_MAP,
       JSON.stringify(dataModelMapValue)
     )
   }
 }
 const initLowCodeData = () => {
   const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
-  const dataModelMap: Property = _.find(processPropertyList, { name: 'data_model_map' })
+  const dataModelMap: Property = _.find(processPropertyList, {
+    name: PROCESS_PROPERTY.DATA_MODEL_MAP
+  })
   if (dataModelMap) {
     const dataModelMapValue = JSON.parse(dataModelMap.value)
     selectedDataModelComponentId.value = _.get(dataModelMapValue, elementId.value)
