@@ -43,7 +43,8 @@ watch(
   (id) => {
     if (id && id.length) {
       nextTick(() => {
-        const documentations = bpmnInstances().bpmnElement.businessObject?.documentation
+        const documentations = bpmnInstances().elementRegistry.get(props.id)?.businessObject
+          ?.documentation
         documentation.value = documentations && documentations.length ? documentations[0].text : ''
       })
     } else {
