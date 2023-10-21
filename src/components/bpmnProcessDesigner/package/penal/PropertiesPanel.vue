@@ -1,5 +1,7 @@
 <template>
   <div class="process-panel__container" :style="{ width: `${width}px` }">
+    {{ elementType }}
+    {{ canBindingLowCodeComponent }}
     <el-collapse v-model="activeTab">
       <el-collapse-item name="base">
         <!-- class="panel-tab__title" -->
@@ -59,6 +61,15 @@
         <template #title><Icon icon="ep:promotion" />其他</template>
         <element-other-config :id="elementId" />
       </el-collapse-item>
+      <el-collapse-item name="lowCode" key="lowCode" v-if="canBindingLowCodeComponent">
+        <template #title><Icon icon="ep:circle-plus-filled" />低代码</template>
+        <low-code-component-selector
+          v-if="elementType === 'DataObjectReference'"
+          v-model="selectedComponentId"
+          @change="updateDataObjectReferenceBindingDataModel"
+        />
+        <process-element-properties ref="processPropertiesEditorRef" />
+      </el-collapse-item>
     </el-collapse>
   </div>
 </template>
@@ -73,6 +84,8 @@ import ElementListeners from './listeners/ElementListeners.vue'
 import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
+import * as _ from 'lodash'
+import ProcessElementProperties from '@/components/bpmnProcessDesigner/package/penal/properties/processElementProperties.vue'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
@@ -102,7 +115,8 @@ const props = defineProps({
   model: Object // 流程模型的数据
 })
 
-const activeTab = ref('base')
+const activeTab = ref('lowCode')
+const processPropertiesEditorRef = ref()
 const elementId = ref('')
 const elementType = ref('')
 const elementBusinessObject = ref<any>({}) // 元素 businessObject 镜像，提供给需要做判断的组件使用
@@ -202,10 +216,24 @@ onBeforeUnmount(() => {
   console.log(props.bpmnModeler, 'props.bpmnModeler1')
 })
 
+// low code
+const canBindingLowCodeComponentElementTypes = ref(['DataObjectReference'])
+const canBindingLowCodeComponent = computed(() =>
+  _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
+)
+const selectedComponentId = ref('')
+const updateDataObjectReferenceBindingDataModel = () => {
+  console.log(selectedComponentId.value, 'componentId')
+  const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
+  console.log('processPropertyList', processPropertyList)
+}
+
 watch(
   () => elementId.value,
   () => {
-    activeTab.value = 'base'
+    activeTab.value = _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
+      ? 'lowCode'
+      : 'base'
   }
 )
 </script>
