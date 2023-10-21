@@ -135,6 +135,40 @@ const saveFormAttribute = () => {
   const { name, value } = propertyForm.value
   saveAttribute(name, value)
 }
+const findFirstAttributeIndex = (name) => {
+  for (let index = 0; index < bpmnElementPropertyList.value.length; index++) {
+    const element = bpmnElementPropertyList.value[index]
+    if (element.name === name) return index
+  }
+  return -1
+}
+const saveAttributeToFirst = (name, value) => {
+  const firstAttributeIndex = findFirstAttributeIndex(name)
+  if (firstAttributeIndex !== -1) {
+    bpmnInstances().modeling.updateModdleProperties(
+      toRaw(bpmnElement.value),
+      toRaw(bpmnElementPropertyList.value)[toRaw(firstAttributeIndex)],
+      {
+        name,
+        value
+      }
+    )
+  } else {
+    // 新建属性字段
+    const newPropertyObject = bpmnInstances().moddle.create(`${prefix}:Property`, {
+      name,
+      value
+    })
+    // 新建一个属性字段的保存列表
+    const propertiesObject = bpmnInstances().moddle.create(`${prefix}:Properties`, {
+      values: bpmnElementPropertyList.value.concat([newPropertyObject])
+    })
+    updateElementExtensions(propertiesObject)
+  }
+  propertyFormModelVisible.value = false
+  resetAttributesList()
+}
+
 const saveAttribute = (name, value) => {
   if (editingPropertyIndex.value !== -1) {
     bpmnInstances().modeling.updateModdleProperties(
@@ -172,5 +206,5 @@ onMounted(() => {
   resetAttributesList()
 })
 
-defineExpose({ getElementPropertyList, saveAttribute }) // 提供 open 方法，用于打开弹窗
+defineExpose({ getElementPropertyList, saveAttribute, saveAttributeToFirst }) // 提供 open 方法，用于打开弹窗
 </script>

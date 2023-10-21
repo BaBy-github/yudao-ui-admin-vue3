@@ -65,7 +65,7 @@
         <template #title><Icon icon="ep:circle-plus-filled" />低代码</template>
         <low-code-component-selector
           v-if="elementType === 'DataObjectReference'"
-          v-model="selectedComponentId"
+          v-model="selectedDataModelComponentId"
           @change="updateDataObjectReferenceBindingDataModel"
         />
         <process-element-properties ref="processPropertiesEditorRef" />
@@ -86,6 +86,7 @@ import ElementProperties from './properties/ElementProperties.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
 import * as _ from 'lodash'
 import ProcessElementProperties from '@/components/bpmnProcessDesigner/package/penal/properties/processElementProperties.vue'
+import { Property } from '@/api/mall/product/spu'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
@@ -221,19 +222,35 @@ const canBindingLowCodeComponentElementTypes = ref(['DataObjectReference'])
 const canBindingLowCodeComponent = computed(() =>
   _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
 )
-const selectedComponentId = ref('')
+const selectedDataModelComponentId = ref('')
 const updateDataObjectReferenceBindingDataModel = () => {
-  console.log(selectedComponentId.value, 'componentId')
   const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
-  console.log('processPropertyList', processPropertyList)
-}
+  const dataModelMap: Property = _.find(processPropertyList, { name: 'data_model_map' })
 
+  if (dataModelMap) {
+    const dataModelMapValue = JSON.parse(dataModelMap.value)
+    dataModelMapValue[elementId.value] = selectedDataModelComponentId.value
+    processPropertiesEditorRef.value.saveAttributeToFirst(
+      'data_model_map',
+      JSON.stringify(dataModelMapValue)
+    )
+  }
+}
+const initLowCodeData = () => {
+  const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
+  const dataModelMap: Property = _.find(processPropertyList, { name: 'data_model_map' })
+  if (dataModelMap) {
+    const dataModelMapValue = JSON.parse(dataModelMap.value)
+    selectedDataModelComponentId.value = _.get(dataModelMapValue, elementId.value)
+  }
+}
 watch(
   () => elementId.value,
   () => {
     activeTab.value = _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
       ? 'lowCode'
       : 'base'
+    if (canBindingLowCodeComponent) nextTick(() => initLowCodeData())
   }
 )
 </script>
