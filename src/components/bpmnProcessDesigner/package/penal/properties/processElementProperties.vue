@@ -1,5 +1,6 @@
 <template>
   <div class="panel-tab__content">
+    流程属性
     <el-table :data="elementPropertyList" max-height="240" fit border>
       <el-table-column label="序号" width="50px" type="index" />
       <el-table-column label="属性名" prop="name" min-width="100px" show-overflow-tooltip />
