@@ -142,12 +142,12 @@ const findFirstAttributeIndex = (name) => {
   }
   return -1
 }
-const saveAttributeToFirst = (name, value) => {
-  const firstAttributeIndex = findFirstAttributeIndex(name)
-  if (firstAttributeIndex !== -1) {
+
+function saveAttributeByIndex(name, value, index: number) {
+  if (index !== -1) {
     bpmnInstances().modeling.updateModdleProperties(
       toRaw(bpmnElement.value),
-      toRaw(bpmnElementPropertyList.value)[toRaw(firstAttributeIndex)],
+      toRaw(bpmnElementPropertyList.value)[toRaw(index)],
       {
         name,
         value
@@ -169,30 +169,14 @@ const saveAttributeToFirst = (name, value) => {
   resetAttributesList()
 }
 
+const saveAttributeToFirst = (name, value) => {
+  const index = findFirstAttributeIndex(name)
+  saveAttributeByIndex(name, value, index)
+}
+
 const saveAttribute = (name, value) => {
-  if (editingPropertyIndex.value !== -1) {
-    bpmnInstances().modeling.updateModdleProperties(
-      toRaw(bpmnElement.value),
-      toRaw(bpmnElementPropertyList.value)[toRaw(editingPropertyIndex.value)],
-      {
-        name,
-        value
-      }
-    )
-  } else {
-    // 新建属性字段
-    const newPropertyObject = bpmnInstances().moddle.create(`${prefix}:Property`, {
-      name,
-      value
-    })
-    // 新建一个属性字段的保存列表
-    const propertiesObject = bpmnInstances().moddle.create(`${prefix}:Properties`, {
-      values: bpmnElementPropertyList.value.concat([newPropertyObject])
-    })
-    updateElementExtensions(propertiesObject)
-  }
-  propertyFormModelVisible.value = false
-  resetAttributesList()
+  const index = editingPropertyIndex.value
+  saveAttributeByIndex(name, value, index)
 }
 const updateElementExtensions = (properties) => {
   const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
