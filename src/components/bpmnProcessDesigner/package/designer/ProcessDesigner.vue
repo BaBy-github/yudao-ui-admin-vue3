@@ -282,6 +282,7 @@ import {
   PROCESS_PROPERTY,
   Property
 } from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
+import { getComponents } from '@/api/bpm/componentId'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -820,6 +821,8 @@ const processSave = async () => {
   })
   const componentIds = _.values(JSON.parse(dataModelMap.value))
   console.log('componentIds', componentIds)
+  const components = await getComponents(componentIds)
+  console.log('components', components)
   const { err, xml } = await bpmnModeler.saveXML()
   console.log(err, 'errerrerrerrerr')
   console.log(xml, 'xmlxmlxmlxmlxml')

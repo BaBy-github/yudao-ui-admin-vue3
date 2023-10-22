@@ -358,3 +358,10 @@ export const BrokerageWithdrawTypeEnum = {
     name: '支付宝'
   }
 }
+
+export const LowCodeComponentTypeEnum = {
+  DATA_MODEL: 'DataModel',
+  CLOUD_FUNCTION: 'CloudFunction',
+  HTTP_CONNECTOR: 'HttpConnector',
+  HTTP_RECEIVER: 'HttpReceiver'
+}
