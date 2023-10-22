@@ -245,7 +245,7 @@ const initLowCodeData = () => {
   })
   if (dataModelMap) {
     const dataModelMapValue = JSON.parse(dataModelMap.value)
-    selectedDataModelComponentId.value = _.get(dataModelMapValue, elementId.value)
+    selectedDataModelComponentId.value = _.get(dataModelMapValue, elementId.value, 'DataModel:0')
   }
 }
 watch(

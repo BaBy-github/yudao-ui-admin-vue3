@@ -66,6 +66,51 @@ export function updateElementExtensions(element, extensionList) {
   })
 }
 
+export function getElementPropertyList(prefix = 'flowable') {
+  const bpmnElement = getProcessElement()
+  const otherExtensionList = [] // 其他扩展配置
+  const bpmnElementProperties =
+    bpmnElement.businessObject?.extensionElements?.values.filter((ex) => {
+      if (ex.$type !== `${prefix}:Properties`) {
+        otherExtensionList.push(ex)
+      }
+      return ex.$type === `${prefix}:Properties`
+    }) ?? []
+
+  // 保存所有的 扩展属性字段
+  const bpmnElementPropertyList = bpmnElementProperties.reduce(
+    (pre, current) => pre.concat(current.values),
+    []
+  )
+  return JSON.parse(JSON.stringify(bpmnElementPropertyList ?? []))
+}
+
+// Documentation
+export function getElementDocumentation(element) {
+  const documentations = element?.businessObject?.documentation
+  return documentations && documentations.length ? documentations[0].text : ''
+}
+
+export function getProcessElement() {
+  return (
+    bpmnInstances().elementRegistry.find((el) => el.type === 'bpmn:Process') ??
+    bpmnInstances().elementRegistry.find((el) => el.type === 'bpmn:Collaboration')
+  )
+}
+
+export function getProcessDocumentation() {
+  const processElement = getProcessElement()
+  return getElementDocumentation(processElement)
+}
+export function setElementDocumentation(element, value) {
+  const documentations = bpmnInstances().bpmnFactory.create('bpmn:Documentation', {
+    text: value
+  })
+  bpmnInstances().modeling.updateProperties(toRaw(element.value), {
+    documentation: [documentations]
+  })
+}
+
 // 创建一个id
 export function uuid(length = 8, chars?) {
   let result = ''

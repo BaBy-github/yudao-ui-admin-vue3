@@ -274,6 +274,14 @@ import * as _ from 'lodash'
 import * as BpmAiApi from '@/api/bpm/ai'
 import ExecuteProgress from '@/components/ExecuteProgress/index.vue'
 import axios from 'axios'
+import {
+  getElementPropertyList,
+  getProcessElement
+} from '@/components/bpmnProcessDesigner/package/utils'
+import {
+  PROCESS_PROPERTY,
+  Property
+} from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -806,7 +814,12 @@ const ai = async () => {
   commandBpmn(commands)
 }
 const processSave = async () => {
-  console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
+  const processPropertyList = getElementPropertyList()
+  const dataModelMap: Property = _.find(processPropertyList, {
+    name: PROCESS_PROPERTY.DATA_MODEL_MAP
+  })
+  const componentIds = _.values(JSON.parse(dataModelMap.value))
+  console.log('componentIds', componentIds)
   const { err, xml } = await bpmnModeler.saveXML()
   console.log(err, 'errerrerrerrerr')
   console.log(xml, 'xmlxmlxmlxmlxml')
