@@ -67,6 +67,7 @@
           @change="updateDataObjectReferenceBindingDataModel"
         />
         <process-element-properties ref="processPropertiesEditorRef" />
+        <process-documentation-editor />
       </el-collapse-item>
     </el-collapse>
   </div>
@@ -86,6 +87,7 @@ import * as _ from 'lodash'
 import ProcessElementProperties from '@/components/bpmnProcessDesigner/package/penal/properties/processElementProperties.vue'
 import { Property } from '@/api/mall/product/spu'
 import { PROCESS_PROPERTY } from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
+import ProcessDocumentationEditor from '@/components/bpmnProcessDesigner/package/penal/other/ProcessDocumentationEditor.vue'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
