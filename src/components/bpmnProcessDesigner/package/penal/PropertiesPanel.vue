@@ -67,7 +67,6 @@
           @change="updateDataObjectReferenceBindingDataModel"
         />
         <process-element-properties ref="processPropertiesEditorRef" />
-        <process-documentation-editor />
       </el-collapse-item>
     </el-collapse>
   </div>
