@@ -10,7 +10,7 @@ const getComponentId = (componentId) => {
   return _.split(componentId, ':')[1]
 }
 // 查询低代码组件
-export const getComponents = async (componentIds: number) => {
+export const getComponents = async (componentIds: string) => {
   const components = []
   for (let i = 0; i < componentIds.length; i++) {
     if (getComponentType(componentIds[i]) === LowCodeComponentTypeEnum.DATA_MODEL) {
