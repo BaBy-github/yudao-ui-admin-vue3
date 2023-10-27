@@ -283,7 +283,8 @@ import axios from 'axios'
 import {
   getDataObjectList,
   getElementPropertyList,
-  getProcessElement
+  getProcessElement,
+  getRefDataObject
 } from '@/components/bpmnProcessDesigner/package/utils'
 import {
   PROCESS_PROPERTY,
@@ -844,7 +845,7 @@ const processSave = async () => {
 }
 const testFunction = () => {
   console.log('testFunction')
-  console.log('getDataObjectList', getDataObjectList())
+  console.log('getRefDataObject', getRefDataObject())
 }
 /** 高亮显示 */
 // const highlightedCode = (previewType, previewResult) => {

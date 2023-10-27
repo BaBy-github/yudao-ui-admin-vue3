@@ -92,6 +92,12 @@ export function getDataObjectList() {
   return _.filter(processElement.businessObject.flowElements, { $type: 'bpmn:DataObject' })
 }
 
+export function getRefDataObject(element: Object | undefined) {
+  const bpmnElement = element ? element : bpmnInstances()?.bpmnElement
+  if (_.get(bpmnElement, 'businessObject.$type', '') !== 'bpmn:DataObjectReference') return
+  return bpmnElement.businessObject.dataObjectRef
+}
+
 // Documentation
 export function getElementDocumentation(element) {
   const documentations = element?.businessObject?.documentation
