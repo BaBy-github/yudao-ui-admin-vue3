@@ -1,4 +1,6 @@
 import { toRaw } from 'vue'
+import * as _ from 'lodash'
+
 const bpmnInstances = () => (window as any)?.bpmnInstances
 // 创建监听器实例
 export function createListenerObject(options, isTask, prefix) {
@@ -83,6 +85,11 @@ export function getElementPropertyList(prefix = 'flowable') {
     []
   )
   return JSON.parse(JSON.stringify(bpmnElementPropertyList ?? []))
+}
+// DataObject
+export function getDataObjectList() {
+  const processElement = getProcessElement()
+  return _.filter(processElement.businessObject.flowElements, { $type: 'bpmn:DataObject' })
 }
 
 // Documentation

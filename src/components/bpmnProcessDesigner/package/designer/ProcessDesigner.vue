@@ -174,6 +174,12 @@
           :disabled="simulationStatus"
         />
         <XButton
+          title="test"
+          @click="testFunction"
+          :type="props.headerButtonType"
+          :disabled="simulationStatus"
+        />
+        <XButton
           title="测试命令"
           v-if="testCommands"
           @click="commandTest"
@@ -275,6 +281,7 @@ import * as BpmAiApi from '@/api/bpm/ai'
 import ExecuteProgress from '@/components/ExecuteProgress/index.vue'
 import axios from 'axios'
 import {
+  getDataObjectList,
   getElementPropertyList,
   getProcessElement
 } from '@/components/bpmnProcessDesigner/package/utils'
@@ -834,6 +841,10 @@ const processSave = async () => {
   }
   // 触发 save 事件
   emit('save', xml)
+}
+const testFunction = () => {
+  console.log('testFunction')
+  console.log('getDataObjectList', getDataObjectList())
 }
 /** 高亮显示 */
 // const highlightedCode = (previewType, previewResult) => {
