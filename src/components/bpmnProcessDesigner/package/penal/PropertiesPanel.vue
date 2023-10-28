@@ -64,7 +64,7 @@
         <low-code-component-selector
           v-if="elementType === 'DataObjectReference'"
           v-model="selectedDataModelComponentId"
-          @change="updateDataObjectReferenceBindingDataModel"
+          @change="updateDataModelMapOfProcessProperty"
         />
         <process-element-properties ref="processPropertiesEditorRef" />
       </el-collapse-item>
@@ -84,9 +84,12 @@ import ElementProperties from './properties/ElementProperties.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
 import * as _ from 'lodash'
 import ProcessElementProperties from '@/components/bpmnProcessDesigner/package/penal/properties/processElementProperties.vue'
-import { Property } from '@/api/mall/product/spu'
-import { PROCESS_PROPERTY } from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
+import {
+  PROCESS_PROPERTY,
+  Property
+} from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
 import ProcessDocumentationEditor from '@/components/bpmnProcessDesigner/package/penal/other/ProcessDocumentationEditor.vue'
+import { getRefDataObject } from '@/components/bpmnProcessDesigner/package/utils'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
@@ -223,20 +226,19 @@ const canBindingLowCodeComponent = computed(() =>
   _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
 )
 const selectedDataModelComponentId = ref('')
-const updateDataObjectReferenceBindingDataModel = () => {
+const updateDataModelMapOfProcessProperty = () => {
   const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
   const dataModelMap: Property = _.find(processPropertyList, {
     name: PROCESS_PROPERTY.DATA_MODEL_MAP
   })
-
-  if (dataModelMap) {
-    const dataModelMapValue = JSON.parse(dataModelMap.value)
-    dataModelMapValue[elementId.value] = selectedDataModelComponentId.value
-    processPropertiesEditorRef.value.saveAttributeToFirst(
-      PROCESS_PROPERTY.DATA_MODEL_MAP,
-      JSON.stringify(dataModelMapValue)
-    )
-  }
+  const dataModelMapValue = dataModelMap ? JSON.parse(dataModelMap.value) : '{}'
+  const dataObjectId = getRefDataObject(bpmnInstances()?.bpmnElement).id
+  if (!dataObjectId) return
+  dataModelMapValue[dataObjectId] = selectedDataModelComponentId.value
+  processPropertiesEditorRef.value.saveAttributeToFirst(
+    PROCESS_PROPERTY.DATA_MODEL_MAP,
+    JSON.stringify(dataModelMapValue)
+  )
 }
 const initLowCodeData = () => {
   const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
