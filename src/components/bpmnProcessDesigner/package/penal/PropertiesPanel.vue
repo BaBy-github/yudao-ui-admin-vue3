@@ -226,12 +226,15 @@ const canBindingLowCodeComponent = computed(() =>
   _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
 )
 const selectedDataModelComponentId = ref('')
-const updateDataModelMapOfProcessProperty = () => {
+const getDataModelMapValue = () => {
   const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
   const dataModelMap: Property = _.find(processPropertyList, {
     name: PROCESS_PROPERTY.DATA_MODEL_MAP
   })
-  const dataModelMapValue = dataModelMap ? JSON.parse(dataModelMap.value) : '{}'
+  return JSON.parse(dataModelMap.value ? dataModelMap.value : '{}')
+}
+const updateDataModelMapOfProcessProperty = () => {
+  const dataModelMapValue = getDataModelMapValue()
   const dataObjectId = getRefDataObject(bpmnInstances()?.bpmnElement).id
   if (!dataObjectId) return
   dataModelMapValue[dataObjectId] = selectedDataModelComponentId.value
@@ -241,14 +244,10 @@ const updateDataModelMapOfProcessProperty = () => {
   )
 }
 const initLowCodeData = () => {
-  const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
-  const dataModelMap: Property = _.find(processPropertyList, {
-    name: PROCESS_PROPERTY.DATA_MODEL_MAP
-  })
-  if (dataModelMap) {
-    const dataModelMapValue = JSON.parse(dataModelMap.value)
-    selectedDataModelComponentId.value = _.get(dataModelMapValue, elementId.value, 'DataModel:0')
-  }
+  const dataModelMapValue = getDataModelMapValue()
+  const dataObjectId = getRefDataObject(bpmnInstances()?.bpmnElement).id
+  if (!dataObjectId) return
+  selectedDataModelComponentId.value = _.get(dataModelMapValue, dataObjectId, 'DataModel:0')
 }
 watch(
   () => elementId.value,
