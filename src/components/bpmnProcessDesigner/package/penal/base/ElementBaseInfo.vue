@@ -1,6 +1,6 @@
 <template>
   <div class="panel-tab__content">
-    <el-form label-width="90px" :model="needProps" :rules="rules">
+    <el-form label-width="100px" :model="needProps" :rules="rules">
       <div v-if="needProps.type == 'bpmn:Process'">
         <!-- 如果是 Process 信息的时候，使用自定义表单 -->
         <el-link
@@ -34,11 +34,19 @@
         <el-form-item label="名称">
           <el-input v-model="elementBaseInfo.name" clearable @change="updateBaseInfo('name')" />
         </el-form-item>
+        <el-form-item
+          v-if="bpmnElement?.businessObject.$type === 'bpmn:DataObjectReference'"
+          label="数据对象名称"
+        >
+          <el-input v-model="refDataObjectName" clearable @change="updateRefDataObjectName" />
+        </el-form-item>
       </div>
     </el-form>
   </div>
 </template>
 <script lang="ts" setup>
+import { getRefDataObject } from '@/components/bpmnProcessDesigner/package/utils'
+
 defineOptions({ name: 'ElementBaseInfo' })
 
 const props = defineProps({
@@ -75,6 +83,13 @@ const resetBaseInfo = () => {
 
   // elementBaseInfo.value = JSON.parse(JSON.stringify(bpmnElement.value.businessObject))
   console.log(elementBaseInfo.value, 'elementBaseInfo22222222222')
+  if (bpmnElement.value?.businessObject.$type === 'bpmn:DataObjectReference') {
+    refDataObjectName.value = getRefDataObject(bpmnElement.value).name
+  }
+}
+const refDataObjectName = ref<string>('')
+const updateRefDataObjectName = (name) => {
+  getRefDataObject(bpmnElement.value).name = name
 }
 const handleKeyUpdate = (value) => {
   // 校验 value 的值，只有 XML NCName 通过的情况下，才进行赋值。否则，会导致流程图报错，无法绘制的问题
