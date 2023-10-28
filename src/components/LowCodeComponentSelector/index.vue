@@ -65,7 +65,7 @@ const updateSelectedComponentId = (selectedId) => {
   updateComponentId()
 }
 const updateComponentId = () => {
-  componentId.value = `${selectedComponentType.value}:${selectedComponentId.value}`
+  componentId.value = `${selectedComponentType.value}_${selectedComponentId.value}`
 }
 const searchComponent = () => {
   dialogVisible.value = true
@@ -74,8 +74,8 @@ const dialogVisible = ref<boolean>(false)
 watch(
   () => props.modelValue,
   (val: string) => {
-    selectedComponentType.value = val.split(':')[0]
-    selectedComponentId.value = val.split(':')[1]
+    selectedComponentType.value = val.split('_')[0]
+    selectedComponentId.value = val.split('_')[1]
   },
   { immediate: true }
 )

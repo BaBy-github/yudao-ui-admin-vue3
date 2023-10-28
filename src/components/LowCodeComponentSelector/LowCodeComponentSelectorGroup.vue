@@ -22,7 +22,7 @@ const componentIds = computed<any>({
 })
 const addComponentId = () => {
   refreshCard.value = false
-  componentIds.value.push('DataModel:0')
+  componentIds.value.push('DataModel_0')
   nextTick(() => {
     refreshCard.value = true
   })

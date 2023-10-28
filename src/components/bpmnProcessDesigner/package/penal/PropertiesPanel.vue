@@ -64,7 +64,7 @@
         <low-code-component-selector
           v-if="elementType === 'DataObjectReference'"
           v-model="selectedDataModelComponentId"
-          @change="updateDataModelMapOfProcessProperty"
+          @change="updateRefDataModelId"
         />
         <process-element-properties ref="processPropertiesEditorRef" />
       </el-collapse-item>
@@ -226,28 +226,15 @@ const canBindingLowCodeComponent = computed(() =>
   _.includes(canBindingLowCodeComponentElementTypes.value, elementType.value)
 )
 const selectedDataModelComponentId = ref('')
-const getDataModelMapValue = () => {
-  const processPropertyList = processPropertiesEditorRef.value.getElementPropertyList()
-  const dataModelMap: Property = _.find(processPropertyList, {
-    name: PROCESS_PROPERTY.DATA_MODEL_MAP
-  })
-  return JSON.parse(dataModelMap.value ? dataModelMap.value : '{}')
-}
-const updateDataModelMapOfProcessProperty = () => {
-  const dataModelMapValue = getDataModelMapValue()
-  const dataObjectId = getRefDataObject(bpmnInstances()?.bpmnElement).id
-  if (!dataObjectId) return
-  dataModelMapValue[dataObjectId] = selectedDataModelComponentId.value
-  processPropertiesEditorRef.value.saveAttributeToFirst(
-    PROCESS_PROPERTY.DATA_MODEL_MAP,
-    JSON.stringify(dataModelMapValue)
-  )
+const updateRefDataModelId = () => {
+  getRefDataObject(bpmnInstances()?.bpmnElement).id = selectedDataModelComponentId.value
 }
 const initLowCodeData = () => {
-  const dataModelMapValue = getDataModelMapValue()
   const dataObjectId = getRefDataObject(bpmnInstances()?.bpmnElement).id
   if (!dataObjectId) return
-  selectedDataModelComponentId.value = _.get(dataModelMapValue, dataObjectId, 'DataModel:0')
+  selectedDataModelComponentId.value = _.startsWith(dataObjectId, 'DataModel_')
+    ? dataObjectId
+    : 'DataModel_0'
 }
 watch(
   () => elementId.value,

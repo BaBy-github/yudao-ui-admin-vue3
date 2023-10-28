@@ -2,7 +2,7 @@
 import LowCodeComponentSelector from '@/components/LowCodeComponentSelector/index.vue'
 import LowCodeComponentSelectorGroup from '@/components/LowCodeComponentSelector/LowCodeComponentSelectorGroup.vue'
 const componentId = ref('')
-const componentIds = ref(['DataModel:1'])
+const componentIds = ref(['DataModel_1'])
 </script>
 
 <template>
