@@ -64,7 +64,7 @@
         <low-code-component-selector
           v-if="elementType === 'DataObjectReference'"
           v-model="selectedDataModelComponentId"
-          @change="updateRefDataModelId"
+          @update:model-value="updateRefDataModelId"
         />
         <process-element-properties ref="processPropertiesEditorRef" />
       </el-collapse-item>
