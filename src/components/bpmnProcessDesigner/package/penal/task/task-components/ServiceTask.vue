@@ -1,6 +1,6 @@
 <template>
   <div style="margin-top: 16px">
-    {{ serviceTaskForm }}
+    {{ fieldsListOfListener }}
     <el-form-item label="执行java类">
       <el-input
         v-model="serviceTaskForm.class"
@@ -59,7 +59,7 @@
         label="字段值/表达式"
         min-width="100px"
         show-overflow-tooltip
-        :formatter="(row) => row.string || row.expression"
+        :formatter="(row) => row.stringValue || row.expression"
       />
       <el-table-column label="操作" width="100px">
         <template #default="scope">
@@ -142,12 +142,15 @@
 
 <script lang="ts" setup>
 import { fieldType } from '@/components/bpmnProcessDesigner/package/penal/listeners/utilSelf'
+import * as _ from 'lodash'
 
 defineOptions({ name: 'ScriptTask' })
 const props = defineProps({
   id: String,
   type: String
 })
+
+const prefix = inject('prefix')
 const defaultTaskForm = ref({
   class: '',
   expression: '',
@@ -199,6 +202,14 @@ const resetTaskForm = () => {
     let value = bpmnElement.value?.businessObject[key] || defaultTaskForm.value[key]
     serviceTaskForm.value[key] = value
   }
+  const fields =
+    bpmnElement.value?.businessObject.extensionElements.values.filter(
+      (ex) => ex.$type === `${prefix}:Field`
+    ) ?? []
+  fieldsListOfListener.value = _.map(fields, (field) => ({
+    ...field,
+    fieldType: field.stringValue ? 'string' : 'expression'
+  }))
 }
 const updateElementTask = () => {
   let taskAttr = Object.create(null)
