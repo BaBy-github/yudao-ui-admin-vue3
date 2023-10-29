@@ -23,6 +23,7 @@
 <script lang="ts" setup>
 import UserTask from './task-components/UserTask.vue'
 import ScriptTask from './task-components/ScriptTask.vue'
+import ServiceTask from './task-components/ServiceTask.vue'
 import ReceiveTask from './task-components/ReceiveTask.vue'
 
 defineOptions({ name: 'ElementTaskConfig' })
@@ -43,6 +44,7 @@ const installedComponent = ref({
   // 发送任务、服务任务、业务规则任务共用一个相同配置
   UserTask: 'UserTask', // 用户任务配置
   ScriptTask: 'ScriptTask', // 脚本任务配置
+  ServiceTask: 'ServiceTask', // 服务任务配置
   ReceiveTask: 'ReceiveTask' // 消息接收任务
 })
 const bpmnElement = ref()
@@ -79,6 +81,9 @@ watch(
     }
     if (props.type == installedComponent.value.ReceiveTask) {
       witchTaskComponent.value = ReceiveTask
+    }
+    if (props.type == installedComponent.value.ServiceTask) {
+      witchTaskComponent.value = ServiceTask
     }
   },
   { immediate: true }
