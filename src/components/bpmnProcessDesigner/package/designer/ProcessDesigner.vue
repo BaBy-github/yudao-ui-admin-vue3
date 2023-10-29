@@ -242,9 +242,11 @@
         :key="aiExecuteHistoryIndex"
       >
         <template #header>
-          <div class="card-header">
-            <span>{{ aiExecuteHistory.executeResult.executedCommandsCount }}</span>
-          </div>
+          <el-row>
+            <el-col :span="3" :offset="21">
+              <XButton preIcon="ep:refresh-left" @click="rollback(aiExecuteHistory)" />
+            </el-col>
+          </el-row>
         </template>
         <div
           v-for="(command, commandIndex) in aiExecuteHistory.commands"
@@ -813,6 +815,9 @@ const testFunction = async () => {
   )
 }
 const aiExecuteHistoryVisible = ref(false)
+const rollback = (aiExecuteHistory) => {
+  createNewDiagram(aiExecuteHistory.startXml)
+}
 /** 高亮显示 */
 // const highlightedCode = (previewType, previewResult) => {
 //   console.log(previewType, 'previewType, previewResult')
