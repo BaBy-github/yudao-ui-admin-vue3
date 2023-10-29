@@ -35,7 +35,7 @@
     </el-form-item>
     <p class="listener-filed__title">
       <span><Icon icon="ep:menu" />注入字段：</span>
-      <el-button size="small" type="primary" @click="openListenerFieldForm(null)"
+      <el-button size="small" disabled type="primary" @click="openListenerFieldForm(null)"
         >添加字段</el-button
       >
     </p>
@@ -63,17 +63,22 @@
       />
       <el-table-column label="操作" width="100px">
         <template #default="scope">
-          <el-button size="small" link @click="openListenerFieldForm(scope.row, scope.$index)"
+          <el-button
+            size="small"
+            disabled
+            link
+            @click="openListenerFieldForm(scope.row, scope.$index)"
             >编辑</el-button
           >
           <el-divider direction="vertical" />
-          <!--          <el-button-->
-          <!--            size="small"-->
-          <!--            link-->
-          <!--            style="color: #ff4d4f"-->
-          <!--            @click="removeListenerField(scope.row, scope.$index)"-->
-          <!--            >移除</el-button-->
-          <!--          >-->
+          <el-button
+            size="small"
+            disabled
+            link
+            style="color: #ff4d4f"
+            @click="removeListenerField(scope.row, scope.$index)"
+            >移除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -116,11 +121,11 @@
         <el-form-item
           v-if="listenerFieldForm.fieldType === 'string'"
           label="字段值："
-          prop="string"
+          prop="stringValue"
           key="field-string"
           :rules="{ required: true, trigger: ['blur', 'change'] }"
         >
-          <el-input v-model="listenerFieldForm.string" clearable />
+          <el-input v-model="listenerFieldForm.stringValue" clearable />
         </el-form-item>
         <el-form-item
           v-if="listenerFieldForm.fieldType === 'expression'"
@@ -143,6 +148,7 @@
 <script lang="ts" setup>
 import { fieldType } from '@/components/bpmnProcessDesigner/package/penal/listeners/utilSelf'
 import * as _ from 'lodash'
+import { updateElementExtensions } from '@/components/bpmnProcessDesigner/package/utils'
 
 defineOptions({ name: 'ScriptTask' })
 const props = defineProps({
@@ -180,21 +186,23 @@ const openListenerFieldForm = (field, index?) => {
     if (listenerFieldFormRef.value) listenerFieldFormRef.value.clearValidate()
   })
 }
-// 保存监听器注入字段
+// 保存java类注入字段
 const saveListenerFiled = async () => {
-  // let validateStatus = await listenerFieldFormRef.value.validate()
-  // if (!validateStatus) return // 验证不通过直接返回
-  // if (editingListenerFieldIndex.value === -1) {
-  //   fieldsListOfListener.value.push(listenerFieldForm.value)
-  //   // listenerForm.value.fields.push(listenerFieldForm.value)
-  // } else {
-  //   fieldsListOfListener.value.splice(editingListenerFieldIndex.value, 1, listenerFieldForm.value)
-  //   // listenerForm.value.fields.splice(editingListenerFieldIndex.value, 1, listenerFieldForm.value)
-  // }
-  // listenerFieldFormModelVisible.value = false
-  // nextTick(() => {
-  //   listenerFieldForm.value = {}
-  // })
+  let validateStatus = await listenerFieldFormRef.value.validate()
+  if (!validateStatus) return // 验证不通过直接返回
+  if (editingListenerFieldIndex.value === -1) {
+    fieldsListOfListener.value.push(listenerFieldForm.value)
+    // listenerForm.value.fields.push(listenerFieldForm.value)
+  } else {
+    fieldsListOfListener.value.splice(editingListenerFieldIndex.value, 1, listenerFieldForm.value)
+    // listenerForm.value.fields.splice(editingListenerFieldIndex.value, 1, listenerFieldForm.value)
+  }
+  updateElementExtensions(bpmnElement.value, fieldsListOfListener.value)
+  console.log(bpmnInstances().bpmnElement.businessObject.extensionElements)
+  listenerFieldFormModelVisible.value = false
+  nextTick(() => {
+    listenerFieldForm.value = {}
+  })
 }
 
 const resetTaskForm = () => {
@@ -217,6 +225,7 @@ const updateElementTask = () => {
   taskAttr.expression = serviceTaskForm.value.expression || null
   taskAttr.delegateExpression = serviceTaskForm.value.delegateExpression || null
   taskAttr.resultVariable = serviceTaskForm.value.resultVariable || null
+  console.log('updateElementTask  taskAttr', taskAttr)
 
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), taskAttr)
 }
