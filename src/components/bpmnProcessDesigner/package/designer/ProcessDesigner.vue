@@ -179,13 +179,6 @@
           :type="props.headerButtonType"
           :disabled="simulationStatus"
         />
-        <XButton
-          title="测试命令"
-          v-if="testCommands"
-          @click="commandTest"
-          :type="props.headerButtonType"
-          :disabled="simulationStatus"
-        />
       </template>
       <!-- 用于打开本地文件-->
       <input
@@ -767,23 +760,6 @@ const userRequirement = ref(
     '    若请假天数超过三天还需要给总经理审批\n' +
     '    否则直接结束'
 )
-const commandTest = async () => {
-  const commands = [
-    ['getElement', 'Event_11e5aw3'],
-    ['createShape', 'bpmn:UserTask', '部门经理审批', 350, 300],
-    ['createShape', 'bpmn:ExclusiveGateway', '判断请假天数', 500, 300],
-    ['createShape', 'bpmn:UserTask', 'HR审批', 600, 200],
-    ['createShape', 'bpmn:EndEvent', '结束', 600, 300],
-    ['connect', 0, 1],
-    ['connect', 1, 2],
-    ['connect', 2, 3],
-    ['connect', 2, 4],
-    ['connect', 3, 4],
-    ['remove', 'Event_155ac8r'],
-    ['remove', 'Flow_1v84kvc']
-  ]
-  commandBpmn(commands)
-}
 const aiExecuteProgressRef = ref()
 const ai = async () => {
   const file = await axios.get('/prompt/aiBpmnCanvas.txt')
@@ -815,12 +791,12 @@ const ai = async () => {
     messages.push(resp.choices[0].message)
     const commandsStr = _.last(messages).content
     commands = JSON.parse(commandsStr.replace(/\n/g, '').replace(/'/g, '"'))
+    await bpmnModeler.get('aiCommandStackHandler').commandBpmn(commands, 300)
     aiExecuteProgressRef.value.success()
   } catch (e) {
     ElNotification.error('画板指令生成失败')
     aiExecuteProgressRef.value.error()
   }
-  commandBpmn(commands)
 }
 const processSave = async () => {
   const { err, xml } = await bpmnModeler.saveXML()
@@ -837,7 +813,7 @@ const processSave = async () => {
 }
 const testFunction = () => {
   console.log('testFunction')
-  console.log('getRefDataObject', getRefDataObject())
+  bpmnModeler.get('aiCommandStackHandler').testBuildBpmnByCommand()
 }
 /** 高亮显示 */
 // const highlightedCode = (previewType, previewResult) => {

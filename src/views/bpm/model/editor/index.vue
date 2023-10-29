@@ -31,6 +31,7 @@ import CustomContentPadProvider from '@/components/bpmnProcessDesigner/package/d
 // 自定义左侧菜单（修改 默认任务 为 用户任务）
 import CustomPaletteProvider from '@/components/bpmnProcessDesigner/package/designer/plugins/palette'
 import * as ModelApi from '@/api/bpm/model'
+import AiCommandStackHandler from '@/components/bpmnProcessDesigner/package/designer/plugins/ai'
 
 defineOptions({ name: 'BpmModelEditor' })
 
@@ -46,7 +47,7 @@ const controlForm = ref({
   labelVisible: false,
   prefix: 'flowable',
   headerButtonSize: 'mini',
-  additionalModel: [CustomContentPadProvider, CustomPaletteProvider]
+  additionalModel: [CustomContentPadProvider, CustomPaletteProvider, AiCommandStackHandler]
 })
 const model = ref<ModelApi.ModelVO>() // 流程模型的信息
 
