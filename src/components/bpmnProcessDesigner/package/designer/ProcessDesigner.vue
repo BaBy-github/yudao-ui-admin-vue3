@@ -708,50 +708,6 @@ const previewProcessJson = () => {
   })
 }
 /* ------------------------------------------------ 芋道源码 methods ------------------------------------------------------ */
-const createShape = (bpmnShapeType, shapeName, x, y) => {
-  const canvas = bpmnModeler.get('canvas')
-  const elementFactory = bpmnModeler.get('elementFactory')
-  const modeling = bpmnModeler.get('modeling')
-  const rootElement = canvas.getRootElement()
-
-  let branchShape = elementFactory.createShape({
-    type: bpmnShapeType
-  })
-  branchShape.businessObject.name = shapeName
-  return modeling.createShape(branchShape, { x, y }, rootElement)
-}
-const testCommands = ref(false)
-const commandBpmn = async (commands) => {
-  console.log('commands', commands)
-  ElNotification.success('开始绘制流程')
-  const modeling = bpmnModeler.get('modeling')
-  const elementRegistry = bpmnModeler.get('elementRegistry')
-
-  const commandElements = []
-  const needRemoveElements = []
-
-  // 遍历命令，获取元素 commands
-  for (let commandsIndex = 0; commandsIndex < commands.length; commandsIndex++) {
-    let command = commands[commandsIndex]
-    let shape
-    if (command[0] === 'createShape') {
-      shape = createShape(command[1], command[2], command[3], command[4])
-    } else if (command[0] === 'getElement') {
-      shape = elementRegistry.get(command[1])
-    } else if (command[0] === 'connect') {
-      shape = modeling.connect(commandElements[command[1]], commandElements[command[2]])
-    } else if (command[0] === 'remove') {
-      shape = elementRegistry.get(command[1])
-      needRemoveElements.push(shape)
-    }
-    commandElements.push(shape)
-    await sleep(300)
-  }
-  modeling.removeElements(needRemoveElements)
-}
-const sleep = async (timeout) => {
-  return new Promise((resolve) => setTimeout(resolve, timeout))
-}
 const userRequirement = ref(
   '我想要一个请假申请的流程。\n' +
     '1.先给部门经理审批\n' +
