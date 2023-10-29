@@ -10,8 +10,8 @@ export default class AiCommandStackHandler {
   }
 
   $inject = ['commandStack', 'modeling', 'elementRegistry', 'canvas', 'elementFactory']
-
-  testBuildBpmnByCommand = () => {
+  executeCommandsHistory = []
+  testBuildBpmnByCommand = async (startXml) => {
     const commands = [
       ['createShape', 'bpmn:StartEvent', '开始', 200, 300],
       ['createShape', 'bpmn:UserTask', '部门经理审批', 350, 300],
@@ -24,34 +24,50 @@ export default class AiCommandStackHandler {
       ['connect', 2, 4],
       ['connect', 3, 4]
     ]
-    this.commandBpmn(commands, 300)
+    await this.commandBpmn(startXml, commands, 300)
   }
 
-  commandBpmn = async (commands, waitTimeOut) => {
-    console.log('commands', commands)
+  commandBpmn = async (startXml, commands, waitTimeOut) => {
+    const executeResult = await this.executeCommands(commands, waitTimeOut)
+    this.executeCommandsHistory.push({ startXml, commands, executeResult })
+  }
+
+  executeCommands = async (commands, waitTimeOut) => {
     ElNotification.success('开始绘制流程')
 
     const commandElements = []
     const needRemoveElements = []
 
-    // 遍历命令，获取元素 commands
-    for (let commandsIndex = 0; commandsIndex < commands.length; commandsIndex++) {
-      let command = commands[commandsIndex]
-      let shape
-      if (command[0] === 'createShape') {
-        shape = this.createShape(command[1], command[2], command[3], command[4])
-      } else if (command[0] === 'getElement') {
-        shape = this._elementRegistry.get(command[1])
-      } else if (command[0] === 'connect') {
-        shape = this._modeling.connect(commandElements[command[1]], commandElements[command[2]])
-      } else if (command[0] === 'remove') {
-        shape = this._elementRegistry.get(command[1])
-        needRemoveElements.push(shape)
+    let commandsExecutingIndex = 0
+    try {
+      for (; commandsExecutingIndex < commands.length; commandsExecutingIndex++) {
+        let command = commands[commandsExecutingIndex]
+        let shape
+        if (command[0] === 'createShape') {
+          shape = this.createShape(command[1], command[2], command[3], command[4])
+        } else if (command[0] === 'getElement') {
+          shape = this._elementRegistry.get(command[1])
+        } else if (command[0] === 'connect') {
+          shape = this._modeling.connect(commandElements[command[1]], commandElements[command[2]])
+        } else if (command[0] === 'remove') {
+          shape = this._elementRegistry.get(command[1])
+          needRemoveElements.push(shape)
+        }
+        commandElements.push(shape)
+        waitTimeOut ? await this.wait(waitTimeOut) : ''
       }
-      commandElements.push(shape)
-      waitTimeOut ? await this.wait(waitTimeOut) : ''
+    } catch (err) {
+      return {
+        executedCommandsCount: commandsExecutingIndex,
+        message: err.message
+      }
+    } finally {
+      this._modeling.removeElements(needRemoveElements)
     }
-    this._modeling.removeElements(needRemoveElements)
+    return {
+      executedCommandsCount: commandsExecutingIndex,
+      message: ''
+    }
   }
 
   wait = async (timeout) => {

@@ -167,12 +167,19 @@
           :type="props.headerButtonType"
           :disabled="simulationStatus"
         />
-        <XButton
-          title="AI"
-          @click="userRequirementVisible = true"
-          :type="props.headerButtonType"
-          :disabled="simulationStatus"
-        />
+        <el-tooltip effect="light" placement="bottom">
+          <template #content>
+            <div style="color: #409eff">
+              <XTextButton title="历史" @click="aiExecuteHistoryVisible = true" />
+            </div>
+          </template>
+          <XButton
+            title="AI"
+            @click="userRequirementVisible = true"
+            :type="props.headerButtonType"
+            :disabled="simulationStatus"
+          />
+        </el-tooltip>
         <XButton
           title="test"
           @click="testFunction"
@@ -228,6 +235,35 @@
         <el-button @click="ai" type="primary">确 定</el-button>
       </template>
     </Dialog>
+    <el-drawer v-model="aiExecuteHistoryVisible" title="AI执行历史" direction="rtl">
+      <el-card
+        v-for="(aiExecuteHistory, aiExecuteHistoryIndex) in bpmnModeler.get('aiCommandStackHandler')
+          .executeCommandsHistory"
+        :key="aiExecuteHistoryIndex"
+      >
+        <template #header>
+          <div class="card-header">
+            <span>{{ aiExecuteHistory.executeResult.executedCommandsCount }}</span>
+          </div>
+        </template>
+        <div
+          v-for="(command, commandIndex) in aiExecuteHistory.commands"
+          :key="commandIndex"
+          class="text item"
+        >
+          <el-text
+            class="mx-1"
+            :type="
+              commandIndex < aiExecuteHistory.executeResult.executedCommandsCount
+                ? 'success'
+                : 'danger'
+            "
+            v-if="commandIndex < aiExecuteHistory.executeResult.executedCommandsCount"
+            >{{ command }}</el-text
+          >
+        </div>
+      </el-card>
+    </el-drawer>
   </div>
 </template>
 
@@ -747,7 +783,7 @@ const ai = async () => {
     messages.push(resp.choices[0].message)
     const commandsStr = _.last(messages).content
     commands = JSON.parse(commandsStr.replace(/\n/g, '').replace(/'/g, '"'))
-    await bpmnModeler.get('aiCommandStackHandler').commandBpmn(commands, 300)
+    await bpmnModeler.get('aiCommandStackHandler').commandBpmn(xml, commands, 300)
     aiExecuteProgressRef.value.success()
   } catch (e) {
     ElNotification.error('画板指令生成失败')
@@ -767,10 +803,16 @@ const processSave = async () => {
   // 触发 save 事件
   emit('save', xml)
 }
-const testFunction = () => {
+const testFunction = async () => {
   console.log('testFunction')
-  bpmnModeler.get('aiCommandStackHandler').testBuildBpmnByCommand()
+  const { xml } = await bpmnModeler.saveXML()
+  await bpmnModeler.get('aiCommandStackHandler').testBuildBpmnByCommand(xml)
+  console.log(
+    '<<<executeCommandsHistory',
+    bpmnModeler.get('aiCommandStackHandler').executeCommandsHistory
+  )
 }
+const aiExecuteHistoryVisible = ref(false)
 /** 高亮显示 */
 // const highlightedCode = (previewType, previewResult) => {
 //   console.log(previewType, 'previewType, previewResult')
