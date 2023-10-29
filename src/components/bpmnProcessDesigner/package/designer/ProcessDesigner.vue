@@ -823,14 +823,6 @@ const ai = async () => {
   commandBpmn(commands)
 }
 const processSave = async () => {
-  const processPropertyList = getElementPropertyList()
-  const dataModelMap: Property = _.find(processPropertyList, {
-    name: PROCESS_PROPERTY.DATA_MODEL_MAP
-  })
-  const componentIds = _.values(JSON.parse(dataModelMap.value))
-  console.log('componentIds', componentIds)
-  const components = await getComponents(componentIds)
-  console.log('components', components)
   const { err, xml } = await bpmnModeler.saveXML()
   console.log(err, 'errerrerrerrerr')
   console.log(xml, 'xmlxmlxmlxmlxml')
