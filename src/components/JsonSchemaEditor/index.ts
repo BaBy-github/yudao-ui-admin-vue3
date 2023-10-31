@@ -1,3 +1,3 @@
-import Dialog from './src/JsonSchemaEditor.vue'
+import Dialog from './src/JsonSchemaEditorV2.vue'
 
 export { Dialog }

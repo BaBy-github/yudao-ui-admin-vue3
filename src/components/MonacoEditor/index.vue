@@ -51,8 +51,10 @@ export default {
       (propsModelValue) => {
         if (propsModelValue !== monacoEditor?.getValue()) {
           monacoEditor.setValue(propsModelValue)
+          monacoEditor.getAction('editor.action.formatDocument').run()
         }
-      }
+      },
+      { deep: true }
     )
 
     return {}
