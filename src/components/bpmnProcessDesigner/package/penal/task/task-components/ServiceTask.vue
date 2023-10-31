@@ -33,7 +33,7 @@
       />
     </el-form-item>
 
-    <http-connector-editor ref="httpConnectorEditorRef" @success="updateServiceTaskHttpConnector" />
+    <http-connector-editor ref="httpConnectorEditorRef" @success="updateServiceTaskDocumentation" />
     <p class="listener-filed__title">
       <span><Icon icon="ep:menu" />注入字段：</span>
       <el-button size="small" disabled type="primary" @click="openServiceTaskFieldForm(null)"
@@ -87,7 +87,7 @@
       type="primary"
       preIcon="ep:plus"
       title="编辑连接器"
-      @click="editHttpConnectorDocument"
+      @click="editHttpConnectorDocumentation"
     />
     <!-- 注入西段 编辑/创建 部分 -->
     <el-dialog
@@ -248,7 +248,7 @@ const updateElementTask = () => {
 // 编辑流程引用的http连接器实例
 const httpConnectorEditorRef = ref<any>()
 const editingComponentId = ref<string>('')
-const editHttpConnectorDocument = () => {
+const editHttpConnectorDocumentation = () => {
   editingComponentId.value = _.find(fieldsListOfServiceTask.value, { name: 'lowCodeComponentId' })
     ?.stringValue
   if (_.isEmpty(editingComponentId.value)) return
@@ -256,11 +256,11 @@ const editHttpConnectorDocument = () => {
     httpConnectorEditorRef.value.open('serviceTask', getRealId(editingComponentId.value))
   }
 }
-const updateServiceTaskHttpConnector = (httpConnector) => {
-  const documentStr = getElementDocumentation(bpmnElement.value)
-  const documentObj = JSON.parse(_.isEmpty(documentStr) ? '{}' : documentStr)
-  documentObj[editingComponentId.value] = httpConnector
-  setElementDocumentation(bpmnElement.value, JSON.stringify(documentObj))
+const updateServiceTaskDocumentation = (httpConnector) => {
+  const documentationStr = getElementDocumentation(bpmnElement.value)
+  const documentationObj = JSON.parse(_.isEmpty(documentationStr) ? '{}' : documentationStr)
+  documentationObj[editingComponentId.value] = httpConnector
+  setElementDocumentation(bpmnElement.value, JSON.stringify(documentationObj))
 }
 
 onBeforeUnmount(() => {
