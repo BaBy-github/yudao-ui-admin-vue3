@@ -261,13 +261,13 @@ const submitForm = async () => {
     if (formType.value === 'create') {
       await HttpConnectorApi.createHttpConnector(data)
       message.success(t('common.createSuccess'))
-    } else {
+    } else if (formType.value === 'update') {
       await HttpConnectorApi.updateHttpConnector(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
     // 发送操作成功的事件
-    emit('success')
+    emit('success', data)
   } finally {
     formLoading.value = false
   }

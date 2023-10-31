@@ -1,6 +1,5 @@
 <template>
   <div style="margin-top: 16px">
-    {{ fieldsListOfServiceTask }}
     <el-form-item label="执行java类">
       <el-input
         v-model="serviceTaskForm.class"
@@ -33,6 +32,8 @@
         @change="updateElementTask()"
       />
     </el-form-item>
+
+    <http-connector-editor ref="httpConnectorEditorRef" @success="updateServiceTaskHttpConnector" />
     <p class="listener-filed__title">
       <span><Icon icon="ep:menu" />注入字段：</span>
       <el-button size="small" disabled type="primary" @click="openServiceTaskFieldForm(null)"
@@ -82,6 +83,12 @@
         </template>
       </el-table-column>
     </el-table>
+    <XButton
+      type="primary"
+      preIcon="ep:plus"
+      title="编辑连接器"
+      @click="editHttpConnectorDocument"
+    />
     <!-- 注入西段 编辑/创建 部分 -->
     <el-dialog
       title="字段配置"
@@ -148,7 +155,14 @@
 <script lang="ts" setup>
 import { fieldType } from '@/components/bpmnProcessDesigner/package/penal/listeners/utilSelf'
 import * as _ from 'lodash'
-import { updateElementExtensions } from '@/components/bpmnProcessDesigner/package/utils'
+import {
+  getElementDocumentation,
+  setElementDocumentation,
+  updateElementExtensions
+} from '@/components/bpmnProcessDesigner/package/utils'
+import HttpConnectorEditor from '@/views/serverless/httpConnector/HttpConnectorEditor.vue'
+import { getRealId, lowCodeComponentIs } from '@/utils/lowCodeComponent'
+import { LowCodeComponentTypeEnum } from '@/utils/constants'
 
 defineOptions({ name: 'ScriptTask' })
 const props = defineProps({
@@ -229,6 +243,24 @@ const updateElementTask = () => {
   console.log('updateElementTask  taskAttr', taskAttr)
 
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), taskAttr)
+}
+
+// 编辑流程引用的http连接器实例
+const httpConnectorEditorRef = ref<any>()
+const editingComponentId = ref<string>('')
+const editHttpConnectorDocument = () => {
+  editingComponentId.value = _.find(fieldsListOfServiceTask.value, { name: 'lowCodeComponentId' })
+    ?.stringValue
+  if (_.isEmpty(editingComponentId.value)) return
+  if (lowCodeComponentIs(LowCodeComponentTypeEnum.HTTP_CONNECTOR, editingComponentId.value)) {
+    httpConnectorEditorRef.value.open('serviceTask', getRealId(editingComponentId.value))
+  }
+}
+const updateServiceTaskHttpConnector = (httpConnector) => {
+  const documentStr = getElementDocumentation(bpmnElement.value)
+  const documentObj = JSON.parse(_.isEmpty(documentStr) ? '{}' : documentStr)
+  documentObj[editingComponentId.value] = httpConnector
+  setElementDocumentation(bpmnElement.value, JSON.stringify(documentObj))
 }
 
 onBeforeUnmount(() => {
