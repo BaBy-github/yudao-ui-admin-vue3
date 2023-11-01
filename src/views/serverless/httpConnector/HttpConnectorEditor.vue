@@ -184,7 +184,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, editingFormData?: object) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -193,7 +193,9 @@ const open = async (type: string, id?: number) => {
   if (id) {
     // formLoading.value = true
     try {
-      formData.value = await HttpConnectorApi.getHttpConnector(id)
+      formData.value = _.isEmpty(editingFormData)
+        ? await HttpConnectorApi.getHttpConnector(id)
+        : editingFormData
       paramsKeyValues.value = JSON.parse(_.get(formData, 'value.params', '[]'))
       if (paramsKeyValuesEditorRef) {
         paramsKeyValuesEditorRef.value.addKeyValueItemNextTick(-1)

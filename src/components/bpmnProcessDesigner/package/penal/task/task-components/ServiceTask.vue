@@ -253,7 +253,13 @@ const editHttpConnectorDocumentation = () => {
     ?.stringValue
   if (_.isEmpty(editingComponentId.value)) return
   if (lowCodeComponentIs(LowCodeComponentTypeEnum.HTTP_CONNECTOR, editingComponentId.value)) {
-    httpConnectorEditorRef.value.open('serviceTask', getRealId(editingComponentId.value))
+    const documentation = getElementDocumentation(bpmnElement.value)
+    const documentationMap = JSON.parse(_.isEmpty(documentation) ? '{}' : documentation)
+    httpConnectorEditorRef.value.open(
+      'serviceTask',
+      getRealId(editingComponentId.value),
+      documentationMap[editingComponentId.value]
+    )
   }
 }
 const updateServiceTaskDocumentation = (httpConnector) => {
