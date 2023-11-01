@@ -118,7 +118,7 @@ export function setElementDocumentation(element, value) {
   const documentations = bpmnInstances().bpmnFactory.create('bpmn:Documentation', {
     text: value
   })
-  bpmnInstances().modeling.updateProperties(toRaw(element.value), {
+  bpmnInstances().modeling.updateProperties(toRaw(element), {
     documentation: [documentations]
   })
 }
