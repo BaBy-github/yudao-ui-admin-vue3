@@ -46,6 +46,9 @@ import Logger from '@/utils/Logger'
 
 import VueDOMPurifyHTML from 'vue-dompurify-html' // 解决v-html 的安全隐患
 
+import JsonSchemaEditor from 'json-schema-editor-vue3'
+import 'json-schema-editor-vue3/lib/json-schema-editor-vue3.css'
+
 // 创建实例
 const setupAll = async () => {
   const app = createApp(App)
@@ -69,6 +72,8 @@ const setupAll = async () => {
   app.use(VXETable)
 
   app.use(VueDOMPurifyHTML)
+
+  app.use(JsonSchemaEditor)
 
   app.mount('#app')
 }

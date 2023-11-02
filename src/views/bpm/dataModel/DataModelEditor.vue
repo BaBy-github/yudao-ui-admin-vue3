@@ -45,11 +45,13 @@
               <el-container>
                 <el-main class="clear-padding" :style="{ height: '68vh' }">
                   <monaco-editor
-                    v-if="jsonSchemaViewer === 'monacoEditor'"
+                    v-show="jsonSchemaViewer === 'monacoEditor'"
                     v-model="formData.metaData"
                     :style="{ height: '68vh' }"
                   />
-                  <div v-else></div>
+                  <div v-show="jsonSchemaViewer !== 'monacoEditor'">
+                    <json-schema-editor :value="tree" />
+                  </div>
                 </el-main>
                 <el-footer class="clear-padding">
                   <el-row>
@@ -142,6 +144,7 @@
 import * as DataModelApi from '@/api/bpm/dataModel'
 import { ValidateReqVO, ValidateResult } from '@/api/bpm/dataModel'
 import { ElNotification } from 'element-plus'
+import { watch } from 'vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -165,6 +168,26 @@ const formRules = reactive({
   sample: [{ required: true, message: '示例不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const tree = ref({
+  root: {
+    type: 'object'
+  }
+})
+
+watch(
+  () => tree.value,
+  () => {
+    formData.value.metaData = JSON.stringify(tree.value.root)
+  },
+  { deep: true }
+)
+
+watch(
+  () => formData.value.metaData,
+  (val) => {
+    tree.value.root = JSON.parse(formData.value.metaData || '{}')
+  }
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -177,6 +200,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await DataModelApi.getDataModel(id)
+      tree.value.root = JSON.parse(formData.value.metaData)
     } finally {
       formLoading.value = false
     }
