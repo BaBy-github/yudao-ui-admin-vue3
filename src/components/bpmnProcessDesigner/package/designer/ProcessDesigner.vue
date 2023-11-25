@@ -180,12 +180,6 @@
             :disabled="simulationStatus"
           />
         </el-tooltip>
-        <XButton
-          title="test"
-          @click="testFunction"
-          :type="props.headerButtonType"
-          :disabled="simulationStatus"
-        />
       </template>
       <!-- 用于打开本地文件-->
       <input
@@ -756,7 +750,7 @@ const userRequirement = ref(
     '    若请假天数超过三天还需要给总经理审批\n' +
     '    否则直接结束'
 )
-const generatePrompt = ref('')
+
 const aiExecuteProgressRef = ref()
 const analyzeUserRequirements = async () => {
   const analyze_user_requirements_prompt_MD = await axios.get('/prompt/分析用户需求.md')
@@ -818,15 +812,7 @@ const processSave = async () => {
   // 触发 save 事件
   emit('save', xml)
 }
-const testFunction = async () => {
-  console.log('testFunction')
-  const { xml } = await bpmnModeler.saveXML()
-  await bpmnModeler.get('aiCommandStackHandler').testBuildBpmnByCommand(xml)
-  console.log(
-    '<<<executeCommandsHistory',
-    bpmnModeler.get('aiCommandStackHandler').executeCommandsHistory
-  )
-}
+
 const aiExecuteHistoryVisible = ref(false)
 const rollback = (aiExecuteHistory) => {
   createNewDiagram(aiExecuteHistory.startXml)
