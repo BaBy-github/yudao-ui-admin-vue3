@@ -89,9 +89,62 @@ export default class AiCommandStackHandler {
     return this._modeling.createShape(branchShape, { x, y }, rootElement)
   }
 
-  createShapeWithId = (bpmnShapeType, shapeName, x, y, id) => {
-    const newShape = this.createShape(bpmnShapeType, shapeName, x, y)
-    this._modeling.updateProperties(newShape, { id })
+  createShapeWithId = (shapeId, shapeType, shapeName, positionX, positionY) => {
+    const newShape = this.createShape(shapeType, shapeName, positionX, positionY)
+    this._modeling.updateProperties(newShape, { id: shapeId })
     return newShape
+  }
+
+  createShapeWithIdWrapper = (params) => {
+    return this.createShapeWithId(
+      params['shapeId'],
+      params['shapeType'],
+      params['shapeName'],
+      params['positionX'],
+      params['positionY']
+    )
+  }
+
+  connectShapes = (sourceShapeId, targetShapeId) => {
+    return this._modeling.connect(
+      this._elementRegistry.get(sourceShapeId),
+      this._elementRegistry.get(targetShapeId)
+    )
+  }
+
+  connectShapesWrapper = (params) => {
+    return this.connectShapes(params['sourceShapeId'], params['targetShapeId'])
+  }
+
+  removeElement = (elementId) => {
+    this._modeling.removeElements([this._elementRegistry.get(elementId)])
+  }
+  removeElementWrapper = (params) => {
+    this.removeElement(params['elementId'])
+  }
+
+  availableFunctions = {
+    createShape: this.createShapeWithIdWrapper,
+    connectShapes: this.connectShapesWrapper,
+    removeElement: this.removeElementWrapper
+  }
+
+  callTool = async (toolCalls) => {
+    const messages = []
+    for (let index = 0; index < toolCalls.length; index++) {
+      const toolCall = toolCalls[index]
+
+      const functionToCall = this.availableFunctions[toolCall.function.name]
+      const functionArgs = JSON.parse(toolCall.function.arguments)
+      functionToCall(functionArgs)
+
+      messages.push({
+        tool_call_id: toolCall.id,
+        role: 'tool',
+        name: functionToCall,
+        content: JSON.stringify({ sucess: true })
+      })
+    }
+    return messages
   }
 }

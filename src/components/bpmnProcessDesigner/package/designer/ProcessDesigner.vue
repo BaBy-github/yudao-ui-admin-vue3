@@ -232,7 +232,7 @@
     >
       <monaco-editor language="text" v-model="userRequirement" />
       <template #footer>
-        <el-button @click="ai" type="primary">确 定</el-button>
+        <el-button @click="analyzeUserRequirements" type="primary">确 定</el-button>
       </template>
     </Dialog>
     <el-drawer v-model="aiExecuteHistoryVisible" title="AI执行历史" direction="rtl">
@@ -322,6 +322,8 @@ import {
   Property
 } from '@/components/bpmnProcessDesigner/package/penal/properties/Property'
 import { getComponents } from '@/api/bpm/componentId'
+import { ChatMessage } from '@/api/bpm/ai'
+import { TOOLS } from '../../../../../public/prompt/tools'
 
 defineOptions({ name: 'MyProcessDesigner' })
 
@@ -754,40 +756,51 @@ const userRequirement = ref(
     '    若请假天数超过三天还需要给总经理审批\n' +
     '    否则直接结束'
 )
+const generatePrompt = ref('')
 const aiExecuteProgressRef = ref()
-const ai = async () => {
-  const file = await axios.get('/prompt/aiBpmnCanvas.txt')
-  const prompt = file.data
+const analyzeUserRequirements = async () => {
+  const analyze_user_requirements_prompt_MD = await axios.get('/prompt/分析用户需求.md')
 
   userRequirementVisible.value = false
   const { xml } = await bpmnModeler.saveXML({ format: true })
-  const messages = [
+  let messages: ChatMessage[] = [
     {
       role: 'user',
-      content: prompt
-    },
-    { role: 'assistant', content: '收到' },
-    {
-      role: 'user',
-      content: `用户需求:${userRequirement.value}。bpmn数据:${xml}`
+      content:
+        analyze_user_requirements_prompt_MD.data +
+        '\n\n### 用户需求: \n' +
+        userRequirement.value +
+        '\n\n### BPMN数据: \n```\n' +
+        xml +
+        '\n```'
     }
   ]
-  const chatRequestBody = {
-    model: 'gpt-3.5-turbo-0613',
-    messages,
-    temperature: 0.7
-  }
   aiExecuteProgressRef.value.loading()
-  let commands
+
   try {
-    ElNotification.info('开始分析需求')
-    const resp = await BpmAiApi.commandBpmn(chatRequestBody)
-    messages.push(resp.choices[0].message)
-    const commandsStr = _.last(messages).content
-    commands = JSON.parse(commandsStr.replace(/\n/g, '').replace(/'/g, '"'))
-    await bpmnModeler.get('aiCommandStackHandler').commandBpmn(xml, commands, 300)
+    ElNotification.success('开始分析需求')
+    const analyzeReportResp = await BpmAiApi.chat(messages)
+    messages.push(analyzeReportResp.choices[0].message)
+
+    ElNotification.success('开始生成绘制指令')
+    messages.push({
+      role: 'user',
+      content: '按照你的步骤一次性给出所有操作.'
+    })
+    const tools = TOOLS.BPMN_CANVAS
+    const bppmnCommandResp = await BpmAiApi.chat(messages, tools)
+    messages.push(bppmnCommandResp.choices[0].message)
+    while (!_.isUndefined(_.last(messages)?.tool_calls)) {
+      const functionResp = await bpmnModeler
+        .get('aiCommandStackHandler')
+        .callTool(_.last(messages)?.tool_calls)
+      messages = [...messages, ...functionResp]
+      const bppmnCommandResp2 = await BpmAiApi.chat(messages, tools)
+      messages.push(bppmnCommandResp2.choices[0].message)
+    }
     aiExecuteProgressRef.value.success()
   } catch (e) {
+    console.log(e)
     ElNotification.error('画板指令生成失败')
     aiExecuteProgressRef.value.error()
   }

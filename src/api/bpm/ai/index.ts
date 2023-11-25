@@ -1,19 +1,28 @@
 import request from '@/config/axios'
+import * as _ from 'lodash'
 
-// 创建工作流的表单定义
-export const commandBpmn = async (chatRequestBody: ChatRequestBody) => {
+export const chat = async (messages: ChatMessage[], tools?: any[]) => {
+  _.forEach(messages, (message: ChatMessage) => {
+    if (_.has(message, 'tool_calls')) {
+      delete message.content
+    }
+  })
+  const data = {
+    model: 'gpt-3.5-turbo-1106',
+    messages
+  }
+  if (!_.isEmpty(tools)) {
+    data['tools'] = tools
+  }
   return await request.post({
     url: '/bpm/ai/command-bpmn',
-    data: chatRequestBody
+    data
   })
 }
 
-interface ChatRequestBody {
-  model: string
-  messages: ChatMessage[]
-  temperature?: number
-}
-interface ChatMessage {
+export interface ChatMessage {
   role: string
-  content: string
+  content?: string
+  finish_reason?: string
+  tool_calls?: any[]
 }
