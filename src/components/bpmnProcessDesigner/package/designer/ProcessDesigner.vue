@@ -224,9 +224,14 @@
       :scroll="true"
       max-height="50vh"
     >
-      <monaco-editor language="text" v-model="userRequirement" />
+      <monaco-editor :style="{ height: '30%' }" language="text" v-model="userRequirement" />
+      <execute-progress ref="analyzeUserRequirementsProgressRef" />
+      <monaco-editor :style="{ height: '70%' }" language="text" v-model="generatePrompt" />
       <template #footer>
-        <el-button @click="analyzeUserRequirements" type="primary">确 定</el-button>
+        <el-button @click="analyzeUserRequirements" type="primary">分 析</el-button>
+        <el-button :disabled="!generatePrompt" @click="generateBpmn" type="primary"
+          >生 成</el-button
+        >
       </template>
     </Dialog>
     <el-drawer v-model="aiExecuteHistoryVisible" title="AI执行历史" direction="rtl">
@@ -752,12 +757,15 @@ const userRequirement = ref(
 )
 
 const aiExecuteProgressRef = ref()
+const analyzeUserRequirementsProgressRef = ref()
+const generatePrompt = ref('')
+const messages = ref([])
+
 const analyzeUserRequirements = async () => {
   const analyze_user_requirements_prompt_MD = await axios.get('/prompt/分析用户需求.md')
 
-  userRequirementVisible.value = false
   const { xml } = await bpmnModeler.saveXML({ format: true })
-  let messages: ChatMessage[] = [
+  messages.value = [
     {
       role: 'user',
       content:
@@ -769,36 +777,47 @@ const analyzeUserRequirements = async () => {
         '\n```'
     }
   ]
-  aiExecuteProgressRef.value.loading()
+  analyzeUserRequirementsProgressRef.value.loading()
 
   try {
-    ElNotification.success('开始分析需求')
-    const analyzeReportResp = await BpmAiApi.chat(messages)
-    messages.push(analyzeReportResp.choices[0].message)
-
-    ElNotification.success('开始生成绘制指令')
-    messages.push({
-      role: 'user',
-      content: '按照你的步骤一次性给出所有操作.'
-    })
-    const tools = TOOLS.BPMN_CANVAS
-    const bppmnCommandResp = await BpmAiApi.chat(messages, tools)
-    messages.push(bppmnCommandResp.choices[0].message)
-    while (!_.isUndefined(_.last(messages)?.tool_calls)) {
-      const functionResp = await bpmnModeler
-        .get('aiCommandStackHandler')
-        .callTool(_.last(messages)?.tool_calls)
-      messages = [...messages, ...functionResp]
-      const bppmnCommandResp2 = await BpmAiApi.chat(messages, tools)
-      messages.push(bppmnCommandResp2.choices[0].message)
-    }
-    aiExecuteProgressRef.value.success()
+    ElNotification.success('开始需求分析')
+    const analyzeReportResp = await BpmAiApi.chat(messages.value)
+    generatePrompt.value = analyzeReportResp.choices[0].message.content
+    analyzeUserRequirementsProgressRef.value.success()
   } catch (e) {
     console.log(e)
-    ElNotification.error('画板指令生成失败')
-    aiExecuteProgressRef.value.error()
+    ElNotification.error('需求分析失败')
+    analyzeUserRequirementsProgressRef.value.error()
   }
 }
+
+const generateBpmn = async () => {
+  userRequirementVisible.value = false
+  aiExecuteProgressRef.value.loading()
+  messages.value.push({
+    role: 'assistant',
+    content: generatePrompt.value
+  })
+  ElNotification.success('开始生成绘制指令')
+  messages.value.push({
+    role: 'user',
+    content:
+      '按照你的步骤一次性给出所有操作。图形产生的位置应该是在一条水平线上，若有网关产生分支时例外。'
+  })
+  const tools = TOOLS.BPMN_CANVAS
+  const bppmnCommandResp = await BpmAiApi.chat(messages.value, tools)
+  messages.value.push(bppmnCommandResp.choices[0].message)
+  while (!_.isUndefined(_.last(messages.value)?.tool_calls)) {
+    const functionResp = await bpmnModeler
+      .get('aiCommandStackHandler')
+      .callTool(_.last(messages.value)?.tool_calls)
+    messages.value = [...messages.value, ...functionResp]
+    const bppmnCommandResp2 = await BpmAiApi.chat(messages.value, tools)
+    messages.value.push(bppmnCommandResp2.choices[0].message)
+  }
+  aiExecuteProgressRef.value.success()
+}
+
 const processSave = async () => {
   const { err, xml } = await bpmnModeler.saveXML()
   console.log(err, 'errerrerrerrerr')
