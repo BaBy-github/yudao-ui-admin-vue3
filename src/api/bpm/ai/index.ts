@@ -15,7 +15,7 @@ export const chat = async (messages: ChatMessage[], tools?: any[]) => {
     data['tools'] = tools
   }
   return await request.post({
-    url: '/bpm/ai/command-bpmn',
+    url: '/bpm/ai/chat',
     data
   })
 }
