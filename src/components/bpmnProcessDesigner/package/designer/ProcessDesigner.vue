@@ -141,6 +141,9 @@
             <!-- <el-button icon="el-icon-c-scale-to-original" @click="processReZoom()" /> -->
             <XButton preIcon="ep:scale-to-original" @click="processReZoom()" />
           </el-tooltip>
+          <el-tooltip effect="light" content="属性面板">
+            <XButton preIcon="ep:operation" @click="togglePanelVisible" />
+          </el-tooltip>
         </ElButtonGroup>
         <ElButtonGroup key="stack-control">
           <el-tooltip effect="light" content="撤销">
@@ -337,7 +340,8 @@ const emit = defineEmits([
   'change',
   'canvas-viewbox-changed',
   // eventName.name
-  'element-click'
+  'element-click',
+  'toggle-panel-visible'
 ])
 
 const props = defineProps({
@@ -692,6 +696,9 @@ const processRestart = () => {
   recoverable.value = false
   revocable.value = false
   createNewDiagram(null)
+}
+const togglePanelVisible = () => {
+  emit('toggle-panel-visible')
 }
 const elementsAlign = (align) => {
   const Align = bpmnModeler.get('alignElements')

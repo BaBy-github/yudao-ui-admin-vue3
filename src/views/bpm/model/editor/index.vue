@@ -10,6 +10,7 @@
       keyboard
       ref="processDesigner"
       @init-finished="initModeler"
+      @toggle-panel-visible="() => (panelVisable = !panelVisable)"
       :additionalModel="controlForm.additionalModel"
       @save="save"
     />
@@ -19,6 +20,7 @@
       :bpmnModeler="modeler as any"
       :prefix="controlForm.prefix"
       class="process-panel"
+      :class="panelVisable ? '' : 'display-none'"
       :model="model"
     />
   </ContentWrap>
@@ -81,6 +83,8 @@ const close = () => {
   router.push({ path: '/bpm/manager/model' })
 }
 
+const panelVisable = ref(true)
+
 /** 初始化 */
 onMounted(async () => {
   const modelId = query.modelId as unknown as number
@@ -102,5 +106,8 @@ onMounted(async () => {
   position: absolute;
   top: 90px;
   right: 60px;
+}
+.display-none {
+  display: none;
 }
 </style>
