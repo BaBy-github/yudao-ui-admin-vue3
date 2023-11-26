@@ -809,7 +809,7 @@ const generateBpmn = async () => {
   messages.value.push({
     role: 'user',
     content:
-      '按照你的步骤一次性给出所有操作。图形产生的位置应该是在一条水平线上，若有网关产生分支时例外。'
+      '按照你的步骤一次性给出所有操作。图形产生的位置应该是在一条水平线上，若有网关产生分支时例外。图形之间需要有合适的间距。'
   })
   const tools = TOOLS.BPMN_CANVAS
   const bppmnCommandResp = await BpmAiApi.chat(messages.value, tools)
