@@ -88,7 +88,7 @@ export const TOOLS = {
         parameters: {
           type: 'object',
           properties: {
-            element_id: {
+            elementId: {
               type: 'string',
               description: 'The element id under the bpmn2 namespace.'
             }
