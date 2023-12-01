@@ -9,6 +9,7 @@ export const chat = async (messages: ChatMessage[], tools?: any[]) => {
   })
   const data = {
     model: 'gpt-3.5-turbo-1106',
+    temperature: 0.7,
     messages
   }
   if (!_.isEmpty(tools)) {

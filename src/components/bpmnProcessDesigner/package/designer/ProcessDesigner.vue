@@ -758,9 +758,8 @@ const userRequirement = ref(
   '我想要一个请假申请的流程。\n' +
     '1.先给部门经理审批\n' +
     '2.再给HR审批。\n' +
-    '3.HR审批完成后判断\n' +
-    '    若请假天数超过三天还需要给总经理审批\n' +
-    '    否则直接结束'
+    '3.HR审批完成后判断请假天数.\n' +
+    '4.若请假天数超过三天还需要给总经理审批，总经理审批完成后结束。否则直接结束'
 )
 
 const aiExecuteProgressRef = ref()
@@ -809,7 +808,7 @@ const generateBpmn = async () => {
   messages.value.push({
     role: 'user',
     content:
-      '按照你的步骤一次性给出所有操作。图形产生的位置应该是在一条水平线上，若有网关产生分支时例外。图形之间需要有合适的间距。'
+      '图形产生的位置应该是在一条水平线上，若有网关产生分支时例外。图形之间需要有合适的间距。按照你的步骤一次性给出所有操作。一次性!'
   })
   const tools = TOOLS.BPMN_CANVAS
   const bppmnCommandResp = await BpmAiApi.chat(messages.value, tools)
