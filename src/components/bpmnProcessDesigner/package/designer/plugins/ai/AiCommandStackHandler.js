@@ -81,6 +81,7 @@ export default class AiCommandStackHandler {
         name: functionToCall,
         content: JSON.stringify({ sucess: true })
       })
+      await this.wait(300)
     }
     return messages
   }
